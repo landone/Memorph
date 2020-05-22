@@ -139,6 +139,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="MemProc.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="CSGO.h" />
+    <ClInclude Include="MemProc.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
