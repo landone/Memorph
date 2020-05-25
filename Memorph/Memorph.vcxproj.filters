@@ -17,12 +17,18 @@
     <ClCompile Include="MemProc.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="TF2.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MemProc.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="CSGO.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TF2.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

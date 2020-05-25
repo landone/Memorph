@@ -140,10 +140,12 @@
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MemProc.cpp" />
+    <ClCompile Include="TF2.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CSGO.h" />
     <ClInclude Include="MemProc.h" />
+    <ClInclude Include="TF2.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
