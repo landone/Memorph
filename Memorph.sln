@@ -5,6 +5,8 @@ VisualStudioVersion = 16.0.29613.14
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Memorph", "Memorph\Memorph.vcxproj", "{1993EEC0-F209-4E3D-9BB9-F4B8AB259509}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MemorphDLL", "MemorphDLL\MemorphDLL.vcxproj", "{61EF4430-B9FF-4F39-B729-3E33C8DF6A0D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -21,6 +23,14 @@ Global
 		{1993EEC0-F209-4E3D-9BB9-F4B8AB259509}.Release|x64.Build.0 = Release|x64
 		{1993EEC0-F209-4E3D-9BB9-F4B8AB259509}.Release|x86.ActiveCfg = Release|Win32
 		{1993EEC0-F209-4E3D-9BB9-F4B8AB259509}.Release|x86.Build.0 = Release|Win32
+		{61EF4430-B9FF-4F39-B729-3E33C8DF6A0D}.Debug|x64.ActiveCfg = Debug|x64
+		{61EF4430-B9FF-4F39-B729-3E33C8DF6A0D}.Debug|x64.Build.0 = Debug|x64
+		{61EF4430-B9FF-4F39-B729-3E33C8DF6A0D}.Debug|x86.ActiveCfg = Debug|Win32
+		{61EF4430-B9FF-4F39-B729-3E33C8DF6A0D}.Debug|x86.Build.0 = Debug|Win32
+		{61EF4430-B9FF-4F39-B729-3E33C8DF6A0D}.Release|x64.ActiveCfg = Release|x64
+		{61EF4430-B9FF-4F39-B729-3E33C8DF6A0D}.Release|x64.Build.0 = Release|x64
+		{61EF4430-B9FF-4F39-B729-3E33C8DF6A0D}.Release|x86.ActiveCfg = Release|Win32
+		{61EF4430-B9FF-4F39-B729-3E33C8DF6A0D}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
