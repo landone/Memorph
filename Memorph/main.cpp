@@ -73,7 +73,5 @@ int main()
 
 	CloseHandle(hProc);
 
-	system("pause");
-
 	return 0;
 }

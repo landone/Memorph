@@ -2,6 +2,7 @@
 
 const std::string TF2::processName = "hl2.exe";
 const std::string TF2::clientDllName = "client.dll";
+const std::string TF2::engineDllName = "engine.dll";
 
 static std::string ClassNames[] = {
 	"None",

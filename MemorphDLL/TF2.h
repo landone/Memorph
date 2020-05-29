@@ -33,9 +33,12 @@ public:
 	static const unsigned long MAX_PLAYERS = 64;
 	static const std::string processName;
 	static const std::string clientDllName;
+	static const std::string engineDllName;
 
 	static const unsigned long dwEntityList = 0xC480A4;
 	static const unsigned long dwLocalPlayer = 0xC3A590;
+	static const unsigned long dwViewAngles = 0x46949C;
+	static const unsigned long dwAttack = 0xC692EC;
 	static const unsigned long m_iHealth = 0xA8;
 	static const unsigned long m_iMaxHealth = 0x17A0;
 	static const unsigned long m_iClass = 0x154C;
@@ -52,5 +55,10 @@ public:
 	static const unsigned long m_hOwnerEntity = 0x504;
 	static const unsigned long m_flLastFireTime = 0xC10;
 	static const unsigned long m_bReadyToBackstab = 0xC64;
+	static const unsigned long m_hRagdoll = 0x14CC;
+	static const unsigned long m_bGoldRagdoll = 0xCA0;
+	static const unsigned long m_iNextMeleeCrit = 0x1B38;
+	static const unsigned long m_angRotation = 0x370;
+	static const unsigned long m_angEyeAngles = 0x1C70;
 
 };
