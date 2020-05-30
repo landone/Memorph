@@ -38,6 +38,7 @@ public:
 	static const unsigned long dwEntityList = 0xC480A4;
 	static const unsigned long dwLocalPlayer = 0xC3A590;
 	static const unsigned long dwViewAngles = 0x46949C;
+	static const unsigned long dwViewMatrix = 0x59EB80;
 	static const unsigned long dwAttack = 0xC692EC;
 	static const unsigned long m_iHealth = 0xA8;
 	static const unsigned long m_iMaxHealth = 0x17A0;

@@ -4,11 +4,30 @@
 #include "MemProc.h"
 #include "TF2.h"
 #include "Includes.h"
+#include <glm/glm.hpp>
 
 void* d3d9Device[119];
 BYTE EndSceneByte[7]{ 0 };
 tEndScene oEndScene = nullptr;
 extern LPDIRECT3DDEVICE9 pDevice = nullptr;
+
+float* viewMatrix = nullptr;
+std::vector<float*> targets;
+
+bool WorldToScreen(const glm::vec4& pos, const glm::mat4& matrix, glm::vec2& output) {
+
+	glm::vec4 product = pos * matrix;
+	if (product.w < 0.1) {
+		return false;
+	}
+
+	glm::vec3 NDC = glm::vec3(product) / product.w;
+	output.x = (windowWidth / 2 * NDC.x) + (NDC.x + windowWidth / 2);
+	output.y = -(windowHeight / 2 * NDC.y) + (NDC.y + windowHeight / 2);
+
+	return true;
+
+}
 
 void APIENTRY hkEndScene(LPDIRECT3DDEVICE9 o_pDevice) {
 
@@ -17,7 +36,27 @@ void APIENTRY hkEndScene(LPDIRECT3DDEVICE9 o_pDevice) {
 	}
 
 	/* Draw Here */
-	DrawFillRect(25, 25, 100, 100, D3DCOLOR_ARGB(255, 255, 255, 255));
+	if (viewMatrix) {
+		glm::mat4 viewMat;
+		memcpy(&viewMat[0][0], viewMatrix, sizeof(float) * 16);
+		for (int i = 0; i < targets.size(); i++) {
+			glm::vec4 targetPos;
+			targetPos.x = targets[i][0];
+			targetPos.y = targets[i][1];
+			targetPos.z = targets[i][2];
+			targetPos.w = 1;
+
+			glm::vec2 output;
+			if (WorldToScreen(targetPos, viewMat, output)) {
+
+				glm::vec2 output2;
+				WorldToScreen(targetPos + glm::vec4(0, 0, 45, 0), viewMat, output2);
+				int size = output.y - output2.y;
+				DrawFillRect(output.x - size / 6, output.y - size, size / 3, size, D3DCOLOR_ARGB(255, 0, 0, 255));
+
+			}
+		}
+	}
 
 	oEndScene(pDevice);
 
@@ -75,6 +114,9 @@ DWORD WINAPI HackThread(HMODULE hModule) {
 		}
 
 		//system("cls");
+		viewMatrix = (float*)(engineBase + TF2::dwViewMatrix);
+		targets.clear();
+
 		float* viewAngles = ((float*)(engineBase + TF2::dwViewAngles));
 		float* myPos = ((float*)(localPlayer + TF2::m_vecOrigin));
 		for (int i = 1; i <= TF2::MAX_PLAYERS; i++) {
@@ -85,11 +127,11 @@ DWORD WINAPI HackThread(HMODULE hModule) {
 				int& team = *((int*)(entAdr + TF2::m_iTeam));
 				if (team > 1 && team != myTeam) {
 
-					float* pos = ((float*)(entAdr + TF2::m_vecOrigin));
-					float angle = atan2f(pos[1] - myPos[1], pos[0] - myPos[0]) * 180.0f / 3.14159f;
-					viewAngles[1] = angle;
-					break;
+					targets.push_back((float*)(entAdr + TF2::m_vecOrigin));
 
+					/*float angle = atan2f(pos[1] - myPos[1], pos[0] - myPos[0]) * 180.0f / 3.14159f;
+					viewAngles[1] = angle;*/
+					
 				}
 
 			}
