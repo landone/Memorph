@@ -6,6 +6,8 @@
 #include <tchar.h>
 #include <stdio.h>
 #include <psapi.h>
+#include <locale>
+#include <codecvt>
 
 MemProc::MemProc() {
 
@@ -31,29 +33,19 @@ bool MemProc::read(const void* dest, int len, unsigned long addr) {
 
 }
 
+unsigned long MemProc::getCurrentModule(std::string name) {
+
+	return GetModuleBaseAddress(GetCurrentProcessId(), name);
+
+}
+
 unsigned long MemProc::getModule(std::string name) {
 
 	if (!isAttached()) {
 		return NULL;
 	}
 
-	HMODULE hMods[1024];
-	DWORD cbNeeded;
-
-	if (EnumProcessModules(handle, hMods, sizeof(hMods), &cbNeeded)) {
-		for (unsigned int i = 0; i < (cbNeeded / sizeof(HMODULE)); i++) {
-			TCHAR szModName[MAX_PATH];
-			if (GetModuleBaseName(handle, hMods[i], szModName, sizeof(szModName) / sizeof(TCHAR))) {
-				std::wstring wstr(szModName);
-				std::string str(wstr.begin(), wstr.end());
-				if (str == name) {
-					return (unsigned long)hMods[i];
-				}
-			}
-		}
-	}
-
-	return NULL;
+	return GetModuleBaseAddress(pid, name.c_str());
 
 }
 
@@ -121,4 +113,60 @@ void MemProc::detach() {
 		pid = 0;
 	}
 
+}
+
+unsigned long MemProc::GetProcId(std::string rawString)
+{
+	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+	std::wstring str = converter.from_bytes(rawString);
+	const wchar_t* procName = str.c_str();
+	DWORD procId = 0;
+	HANDLE hSnap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+	if (hSnap != INVALID_HANDLE_VALUE)
+	{
+		PROCESSENTRY32 procEntry;
+		procEntry.dwSize = sizeof(procEntry);
+
+		if (Process32First(hSnap, &procEntry))
+		{
+			do
+			{
+				if (!_wcsicmp(procEntry.szExeFile, procName))
+				{
+					procId = procEntry.th32ProcessID;
+					break;
+				}
+			} while (Process32Next(hSnap, &procEntry));
+
+		}
+	}
+	CloseHandle(hSnap);
+	return procId;
+}
+
+unsigned long MemProc::GetModuleBaseAddress(unsigned long procId, std::string rawString)
+{
+	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+	std::wstring str = converter.from_bytes(rawString);
+	const wchar_t* modName = str.c_str();
+	uintptr_t modBaseAddr = 0;
+	HANDLE hSnap = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE | TH32CS_SNAPMODULE32, procId);
+	if (hSnap != INVALID_HANDLE_VALUE)
+	{
+		MODULEENTRY32 modEntry;
+		modEntry.dwSize = sizeof(modEntry);
+		if (Module32First(hSnap, &modEntry))
+		{
+			do
+			{
+				if (!_wcsicmp(modEntry.szModule, modName))
+				{
+					modBaseAddr = (uintptr_t)modEntry.modBaseAddr;
+					break;
+				}
+			} while (Module32Next(hSnap, &modEntry));
+		}
+	}
+	CloseHandle(hSnap);
+	return modBaseAddr;
 }

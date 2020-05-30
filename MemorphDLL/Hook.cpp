@@ -1,6 +1,8 @@
-#include "Includes.h"
+#include <Windows.h>
 
-void Patch(BYTE* dest, BYTE* src, unsigned int size) {
+#include "Hook.h"
+
+void Hook::Patch(unsigned char* dest, unsigned char* src, unsigned int size) {
 
 	DWORD oProc;
 	VirtualProtect(dest, size, PAGE_EXECUTE_READWRITE, &oProc);
@@ -9,7 +11,7 @@ void Patch(BYTE* dest, BYTE* src, unsigned int size) {
 
 }
 
-bool Hook(char* src, char* dest, int len) {
+bool Hook::DefaultHook(char* src, char* dest, int len) {
 
 	if (len < 5) {
 		return false;
@@ -27,7 +29,7 @@ bool Hook(char* src, char* dest, int len) {
 
 }
 
-char* TrampHook(char* src, char* dest, unsigned int len) {
+char* Hook::TrampHook(char* src, char* dest, unsigned int len) {
 
 	if (len < 5) {
 		return nullptr;
@@ -41,7 +43,7 @@ char* TrampHook(char* src, char* dest, unsigned int len) {
 	uintptr_t jumpAddy = (uintptr_t)(src - gateway - 5);
 	*(gateway + len) = (char)0xE9;
 	*(uintptr_t*)(gateway + len + 1) = jumpAddy;
-	if (Hook(src, dest, len)) {
+	if (DefaultHook(src, dest, len)) {
 		return gateway;
 	}
 

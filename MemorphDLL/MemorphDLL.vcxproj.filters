@@ -11,13 +11,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="proc.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="dllmain.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="mem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="MemProc.cpp">
@@ -26,29 +20,17 @@
     <ClCompile Include="TF2.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="dx.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Hook.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Drawing.cpp">
+    <ClCompile Include="TF2_WallHack.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DX.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="mem.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="proc.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="stdafx.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="targetver.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="CSGO.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -61,13 +43,13 @@
     <ClInclude Include="Hook.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Drawing.h">
+    <ClInclude Include="DX.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="dx.h">
+    <ClInclude Include="Hack.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Includes.h">
+    <ClInclude Include="TF2_WallHack.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
