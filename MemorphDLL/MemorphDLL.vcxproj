@@ -71,6 +71,8 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
+    <IncludePath>$(DXSDK_DIR)Include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(DXSDK_DIR)Lib\x86;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
@@ -139,6 +141,9 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp" />
+    <ClCompile Include="Drawing.cpp" />
+    <ClCompile Include="dx.cpp" />
+    <ClCompile Include="Hook.cpp" />
     <ClCompile Include="mem.cpp" />
     <ClCompile Include="MemProc.cpp" />
     <ClCompile Include="proc.cpp" />
@@ -146,6 +151,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CSGO.h" />
+    <ClInclude Include="Drawing.h" />
+    <ClInclude Include="dx.h" />
+    <ClInclude Include="Hook.h" />
+    <ClInclude Include="Includes.h" />
     <ClInclude Include="mem.h" />
     <ClInclude Include="MemProc.h" />
     <ClInclude Include="proc.h" />

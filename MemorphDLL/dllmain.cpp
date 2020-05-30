@@ -3,8 +3,37 @@
 #include "proc.h"
 #include "MemProc.h"
 #include "TF2.h"
+#include "Includes.h"
+
+void* d3d9Device[119];
+BYTE EndSceneByte[7]{ 0 };
+tEndScene oEndScene = nullptr;
+extern LPDIRECT3DDEVICE9 pDevice = nullptr;
+
+void APIENTRY hkEndScene(LPDIRECT3DDEVICE9 o_pDevice) {
+
+	if (!pDevice) {
+		pDevice = o_pDevice;
+	}
+
+	/* Draw Here */
+	DrawFillRect(25, 25, 100, 100, D3DCOLOR_ARGB(255, 255, 255, 255));
+
+	oEndScene(pDevice);
+
+}
 
 DWORD WINAPI HackThread(HMODULE hModule) {
+
+	/* Hook EndScene() for drawing */
+	if (GetD3D9Device(d3d9Device, sizeof(d3d9Device))) {
+
+		/* Grab EndScene() */
+		memcpy(EndSceneByte, (char*)d3d9Device[42], 7);
+		/* Store original EndScene */
+		oEndScene = (tEndScene)TrampHook((char*)d3d9Device[42], (char*)hkEndScene, 7);
+
+	}
 
 	AllocConsole();
 	FILE* f;
@@ -70,6 +99,9 @@ DWORD WINAPI HackThread(HMODULE hModule) {
 		Sleep(12);
 
 	}
+
+	/* Unhook EndScene() */
+	Patch((BYTE*)d3d9Device[42], EndSceneByte, 7);
 
 	if (f != 0) {
 		fclose(f);
