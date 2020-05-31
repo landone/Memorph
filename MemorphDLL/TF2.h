@@ -25,6 +25,12 @@ public:
 		Team_BLU
 	};
 
+	enum GameStatus {
+		GameStatus_None = 0,
+		GameStatus_Connecting,
+		GameStatus_InGame
+	};
+
 	static std::string ClassToString(int);
 	static std::string TeamToString(int);
 	
@@ -40,6 +46,7 @@ public:
 	static const unsigned long dwViewAngles = 0x46949C;
 	static const unsigned long dwViewMatrix = 0x59EB80;
 	static const unsigned long dwAttack = 0xC692EC;
+	static const unsigned long dwIsInGame = 0x5DAACC;
 	static const unsigned long m_iHealth = 0xA8;
 	static const unsigned long m_iMaxHealth = 0x17A0;
 	static const unsigned long m_iClass = 0x154C;
@@ -61,5 +68,6 @@ public:
 	static const unsigned long m_iNextMeleeCrit = 0x1B38;
 	static const unsigned long m_angRotation = 0x370;
 	static const unsigned long m_angEyeAngles = 0x1C70;
+	static const unsigned long m_iObserverMode = 0x109C;
 
 };
