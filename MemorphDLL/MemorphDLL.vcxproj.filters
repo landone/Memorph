@@ -29,6 +29,12 @@
     <ClCompile Include="DX.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="CSGO_WallHack.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CSGO.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CSGO.h">
@@ -50,6 +56,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="TF2_WallHack.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CSGO_WallHack.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

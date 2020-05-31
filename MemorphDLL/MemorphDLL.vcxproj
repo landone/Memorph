@@ -140,6 +140,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="CSGO.cpp" />
+    <ClCompile Include="CSGO_WallHack.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="DX.cpp" />
     <ClCompile Include="Hook.cpp" />
@@ -149,6 +151,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CSGO.h" />
+    <ClInclude Include="CSGO_WallHack.h" />
     <ClInclude Include="DX.h" />
     <ClInclude Include="Hack.h" />
     <ClInclude Include="Hook.h" />

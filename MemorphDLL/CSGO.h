@@ -1,7 +1,16 @@
 #pragma once
 
+#include <string>
+
 class CSGO {
 public:
+
+    static const unsigned long handleSize = 0x4;
+    static const unsigned long entityRefSize = 0x10;
+    static const unsigned long MAX_PLAYERS = 64;
+    static const std::string processName;
+    static const std::string clientDllName;
+    static const std::string engineDllName;
 
     static const unsigned long cs_gamerules_data = 0x0;
     static const unsigned long m_ArmorValue = 0xB368;
@@ -88,14 +97,13 @@ public:
     static const unsigned long m_vecVelocity = 0x114;
     static const unsigned long m_vecViewOffset = 0x108;
     static const unsigned long m_viewPunchAngle = 0x3020;
-
     static const unsigned long anim_overlays = 0x2980;
     static const unsigned long clientstate_choked_commands = 0x4D28;
     static const unsigned long clientstate_delta_ticks = 0x174;
     static const unsigned long clientstate_last_outgoing_command = 0x4D24;
     static const unsigned long clientstate_net_channel = 0x9C;
     static const unsigned long convar_name_hash_table = 0x2F0F8;
-    static const unsigned long dwClientState = 0x589DCC;
+    static const unsigned long dwClientState = 0x589DD4;
     static const unsigned long dwClientState_GetLocalPlayer = 0x180;
     static const unsigned long dwClientState_IsHLTV = 0x4D40;
     static const unsigned long dwClientState_Map = 0x28C;
@@ -104,47 +112,47 @@ public:
     static const unsigned long dwClientState_PlayerInfo = 0x52B8;
     static const unsigned long dwClientState_State = 0x108;
     static const unsigned long dwClientState_ViewAngles = 0x4D88;
-    static const unsigned long dwEntityList = 0x4D43AC4;
-    static const unsigned long dwForceAttack = 0x3175068;
-    static const unsigned long dwForceAttack2 = 0x3175074;
-    static const unsigned long dwForceBackward = 0x31750A4;
-    static const unsigned long dwForceForward = 0x3175080;
-    static const unsigned long dwForceJump = 0x51ED760;
-    static const unsigned long dwForceLeft = 0x3175098;
-    static const unsigned long dwForceRight = 0x31750BC;
+    static const unsigned long dwEntityList = 0x4D4B134;
+    static const unsigned long dwForceAttack = 0x317C71C;
+    static const unsigned long dwForceAttack2 = 0x317C728;
+    static const unsigned long dwForceBackward = 0x317C6D4;
+    static const unsigned long dwForceForward = 0x317C740;
+    static const unsigned long dwForceJump = 0x51F4DB0;
+    static const unsigned long dwForceLeft = 0x317C6C8;
+    static const unsigned long dwForceRight = 0x317C6EC;
     static const unsigned long dwGameDir = 0x6286F8;
-    static const unsigned long dwGameRulesProxy = 0x5260A3C;
-    static const unsigned long dwGetAllClasses = 0xD55F2C;
-    static const unsigned long dwGlobalVars = 0x589AD0;
-    static const unsigned long dwGlowObjectManager = 0x528B8A0;
-    static const unsigned long dwInput = 0x5195070;
-    static const unsigned long dwInterfaceLinkList = 0x8FA4A4;
-    static const unsigned long dwLocalPlayer = 0xD2FB94;
-    static const unsigned long dwMouseEnable = 0xD35738;
-    static const unsigned long dwMouseEnablePtr = 0xD35708;
-    static const unsigned long dwPlayerResource = 0x317340C;
-    static const unsigned long dwRadarBase = 0x5178834;
-    static const unsigned long dwSensitivity = 0xD355D4;
-    static const unsigned long dwSensitivityPtr = 0xD355A8;
-    static const unsigned long dwSetClanTag = 0x89ED0;
-    static const unsigned long dwViewMatrix = 0x4D35404;
-    static const unsigned long dwWeaponTable = 0x5195B34;
+    static const unsigned long dwGameRulesProxy = 0x526809C;
+    static const unsigned long dwGetAllClasses = 0xD5CF8C;
+    static const unsigned long dwGlobalVars = 0x589AD8;
+    static const unsigned long dwGlowObjectManager = 0x5292F18;
+    static const unsigned long dwInput = 0x519C6C8;
+    static const unsigned long dwInterfaceLinkList = 0x8FFB74;
+    static const unsigned long dwLocalPlayer = 0xD36B94;
+    static const unsigned long dwMouseEnable = 0xD3C738;
+    static const unsigned long dwMouseEnablePtr = 0xD3C708;
+    static const unsigned long dwPlayerResource = 0x317AA6C;
+    static const unsigned long dwRadarBase = 0x517FE8C;
+    static const unsigned long dwSensitivity = 0xD3C5D4;
+    static const unsigned long dwSensitivityPtr = 0xD3C5A8;
+    static const unsigned long dwSetClanTag = 0x89F00;
+    static const unsigned long dwViewMatrix = 0x4D3CA64;
+    static const unsigned long dwWeaponTable = 0x519D18C;
     static const unsigned long dwWeaponTableIndex = 0x325C;
-    static const unsigned long dwYawPtr = 0xD35398;
-    static const unsigned long dwZoomSensitivityRatioPtr = 0xD3A5E0;
-    static const unsigned long dwbSendPackets = 0xD3ECA;
+    static const unsigned long dwYawPtr = 0xD3C398;
+    static const unsigned long dwZoomSensitivityRatioPtr = 0xD415E0;
+    static const unsigned long dwbSendPackets = 0xD3EFA;
     static const unsigned long dwppDirect3DDevice9 = 0xA7030;
-    static const unsigned long find_hud_element = 0x2EB7C3F0;
-    static const unsigned long force_update_spectator_glow = 0x3991F2;
+    static const unsigned long find_hud_element = 0x29CCFD40;
+    static const unsigned long force_update_spectator_glow = 0x39CB92;
     static const unsigned long interface_engine_cvar = 0x3E9EC;
-    static const unsigned long is_c4_owner = 0x3A59C0;
+    static const unsigned long is_c4_owner = 0x3A93A0;
     static const unsigned long m_bDormant = 0xED;
     static const unsigned long m_flSpawnTime = 0xA360;
     static const unsigned long m_pStudioHdr = 0x294C;
-    static const unsigned long m_pitchClassPtr = 0x5178AD8;
-    static const unsigned long m_yawClassPtr = 0xD35398;
-    static const unsigned long model_ambient_min = 0x58CE44;
-    static const unsigned long set_abs_angles = 0x1CF1D0;
-    static const unsigned long set_abs_origin = 0x1CF010;
+    static const unsigned long m_pitchClassPtr = 0x5180130;
+    static const unsigned long m_yawClassPtr = 0xD3C398;
+    static const unsigned long model_ambient_min = 0x58CE4C;
+    static const unsigned long set_abs_angles = 0x1D2B60;
+    static const unsigned long set_abs_origin = 0x1D29A0;
 
 };

@@ -5,7 +5,7 @@
 
 #include "Hack.h"
 
-class TF2_WallHack : public Hack {
+class CSGO_WallHack : public Hack {
 public:
 
 	void OnStart() override;
@@ -24,10 +24,7 @@ private:
 	unsigned long* localPlayerPtr;
 	bool inGame = false;
 	int* myTeam;
-	int* myClass;
 	int* myObserveMode;
-	bool attacked = false;
 	std::mutex targetMutex;
-	std::mutex attackMutex;
 
 };

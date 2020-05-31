@@ -13,7 +13,6 @@ void TF2_WallHack::OnStart() {
 	engineBase = MemProc::getCurrentModule(TF2::engineDllName);
 	entList = clientBase + TF2::dwEntityList;
 	localPlayerPtr = (unsigned long*)(clientBase + TF2::dwLocalPlayer);
-	gameStatus = (int*)(engineBase + TF2::dwIsInGame);
 	viewMatrix = (float*)(engineBase + TF2::dwViewMatrix);
 
 }
@@ -43,7 +42,6 @@ void TF2_WallHack::OnThink() {
 		myObserveMode = ((int*)((*localPlayerPtr) + TF2::m_iObserverMode));
 		myTeam = ((int*)((*localPlayerPtr) + TF2::m_iTeam));
 		myClass = ((int*)((*localPlayerPtr) + TF2::m_iClass));
-		myTeam = ((int*)((*localPlayerPtr) + TF2::m_iTeam));
 
 	}
 

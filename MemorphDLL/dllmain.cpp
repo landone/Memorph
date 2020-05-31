@@ -4,9 +4,10 @@
 #include "Hack.h"
 #include "TF2.h"
 #include "TF2_WallHack.h"
+#include "CSGO_WallHack.h"
 #include "DX.h"
 
-TF2_WallHack wallHack;
+CSGO_WallHack wallHack;
 std::vector<Hack*> hacks = {
 	&wallHack
 };

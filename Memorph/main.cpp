@@ -1,7 +1,7 @@
 #include "Injection.h"
 
 const char szDllFile[] = ".\\MemorphDLL.dll";
-const char szProc[] = "hl2.exe";
+const char szProc[] = "csgo.exe";
 
 bool IsCorrectTargetArchitecture(HANDLE hProc)
 {
