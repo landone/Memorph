@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <mutex>
+#include <glm/glm.hpp>
 
 #include "Hack.h"
 
@@ -15,9 +16,12 @@ public:
 
 private:
 
+	void aimAt(unsigned long ent);
+	glm::vec3 getBonePos(unsigned long ent, int bone);
+
 	float* viewMatrix = nullptr;
 	float* myPos = nullptr;
-	std::vector<float*> targets;
+	std::vector<unsigned long> targets;
 	unsigned long clientBase;
 	unsigned long engineBase;
 	unsigned long entList;

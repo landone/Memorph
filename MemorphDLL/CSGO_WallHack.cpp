@@ -23,6 +23,30 @@ void CSGO_WallHack::OnEnd() {
 
 }
 
+void CSGO_WallHack::aimAt(unsigned long entAdr) {
+
+	unsigned long clientState = *(unsigned long*)(engineBase + CSGO::dwClientState);
+	float* viewAng = (float*)(clientState + CSGO::dwClientState_ViewAngles);
+	glm::vec4 enemPos = glm::vec4(getBonePos(entAdr, 8), 1);
+	glm::vec4 myPos = glm::vec4(getBonePos((*localPlayerPtr), 8), 1);
+
+	float flatDist = sqrtf(pow(enemPos[0] - myPos[0], 2) + pow(enemPos[1] - myPos[1], 2));
+	viewAng[0] = -atan2f(enemPos[2] - myPos[2], flatDist) * 180.0f / 3.14159f;
+	viewAng[1] = atan2f(enemPos[1] - myPos[1], enemPos[0] - myPos[0]) * 180.0f / 3.14159f;
+
+}
+
+glm::vec3 CSGO_WallHack::getBonePos(unsigned long ent, int bone) {
+
+	unsigned long boneMat = *((unsigned long*)(ent + CSGO::m_dwBoneMatrix));
+	glm::vec3 bonePos;
+	bonePos.x = *(float*)(boneMat + 0x30 * bone + 0x0C);
+	bonePos.y = *(float*)(boneMat + 0x30 * bone + 0x1C);
+	bonePos.z = *(float*)(boneMat + 0x30 * bone + 0x2C);
+	return bonePos;
+
+}
+
 void CSGO_WallHack::OnThink() {
 
 	targetMutex.lock();
@@ -58,7 +82,7 @@ void CSGO_WallHack::OnThink() {
 			if (team > 1 && team != (*myTeam)) {
 
 				targetMutex.lock();
-				targets.push_back((float*)(entAdr + CSGO::m_vecOrigin));
+				targets.push_back(entAdr);
 				targetMutex.unlock();
 
 			}
@@ -79,21 +103,20 @@ void CSGO_WallHack::OnDraw() {
 	memcpy(&viewMat[0][0], viewMatrix, sizeof(float) * 16);
 	targetMutex.lock();
 	for (int i = 0; i < targets.size(); i++) {
-		glm::vec4 targetPos;
-		targetPos.x = targets[i][0];
-		targetPos.y = targets[i][1];
-		targetPos.z = targets[i][2];
-		targetPos.w = 1;
+
+		aimAt(targets[i]);
+		break;
+		/*glm::vec4 headPos = glm::vec4(getBonePos(targets[i], 8), 1);
 
 		glm::vec2 output;
-		if (DX::WorldToScreen(targetPos, viewMat, output)) {
+		if (DX::WorldToScreen(headPos, viewMat, output)) {
 
 			glm::vec2 output2;
-			DX::WorldToScreen(targetPos + glm::vec4(0, 0, 45, 0), viewMat, output2);
+			DX::WorldToScreen(headPos + glm::vec4(0, 0, 10, 0), viewMat, output2);
 			int size = output.y - output2.y;
-			DX::DrawFillRect(output - glm::vec2(size / 6, size), glm::vec2(size / 3, size), glm::vec4(255, 0, 0, 255));
+			DX::DrawFillRect(output - glm::vec2(size / 2, size), glm::vec2(size, size), glm::vec4(255, 0, 0, 255));
 
-		}
+		}*/
 	}
 	targetMutex.unlock();
 

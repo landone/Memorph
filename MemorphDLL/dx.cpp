@@ -24,6 +24,20 @@ void DX::DrawFillRect(glm::vec2 pos, glm::vec2 dim, glm::vec4 color) {
 
 }
 
+void DX::DrawLine(glm::vec2 pos, glm::vec2 pos2, int width, glm::vec4 color) {
+
+	ID3DXLine* line;
+	D3DXCreateLine(DX::pDevice, &line);
+
+	D3DXVECTOR2 linePts[2];
+	linePts[0] = D3DXVECTOR2(pos.x, pos.y);
+	linePts[1] = D3DXVECTOR2(pos2.x, pos2.y);
+	line->SetWidth(width);
+	line->Draw(linePts, 2, D3DCOLOR_RGBA((int)color.r, (int)color.g, (int)color.b, (int)color.a));
+	line->Release();
+
+}
+
 bool DX::WorldToScreen(const glm::vec4& pos, const glm::mat4& matrix, glm::vec2& output) {
 
 	glm::vec4 product = pos * matrix;

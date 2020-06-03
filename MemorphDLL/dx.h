@@ -11,6 +11,7 @@ public:
 
 	static bool WorldToScreen(const glm::vec4& pos, const glm::mat4& matrix, glm::vec2& output);
 	static void DrawFillRect(glm::vec2 pos, glm::vec2 dim, glm::vec4 color);
+	static void DrawLine(glm::vec2 pos, glm::vec2 pos2, int width, glm::vec4 color);
 
 private:
 

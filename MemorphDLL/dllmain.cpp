@@ -7,6 +7,7 @@
 #include "CSGO_WallHack.h"
 #include "DX.h"
 
+//TF2_WallHack wallHack;
 CSGO_WallHack wallHack;
 std::vector<Hack*> hacks = {
 	&wallHack
