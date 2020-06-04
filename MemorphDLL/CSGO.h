@@ -146,4 +146,13 @@ public:
     static const unsigned long set_abs_angles = 0x1D2CD0;
     static const unsigned long set_abs_origin = 0x1D2B10;
 
+    static const int BoneOrder[];
+    static const int BoneOrderSize = 19;
+    static const int Bone_ProfileEnd = 2;
+    static const int Bone_LeftArmEnd = 6;
+    static const int Bone_RightArmEnd = 10;
+    static const int Bone_TorsoEnd = 12;
+    static const int Bone_LeftLegEnd = 15;
+    static const int Bone_RightLegEnd = 18;
+
 };

@@ -10,6 +10,8 @@
 #include "Hook.h"
 
 HWND DX::window;
+ID3DXFont* DX::font = nullptr;
+float DX::fontHeight = 16.0f;
 int DX::windowDim[2];
 LPDIRECT3DDEVICE9 DX::pDevice;
 void* DX::d3d9Device[119];
@@ -38,9 +40,21 @@ void DX::DrawLine(glm::vec2 pos, glm::vec2 pos2, int width, glm::vec4 color) {
 
 }
 
-bool DX::WorldToScreen(const glm::vec4& pos, const glm::mat4& matrix, glm::vec2& output) {
+void DX::WriteText(glm::vec2 pos, std::string text, glm::vec4 color) {
 
-	glm::vec4 product = pos * matrix;
+	if (font == nullptr) {
+		D3DXCreateFont(DX::pDevice, fontHeight, 0, FW_NORMAL, 1, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, ANTIALIASED_QUALITY,
+			DEFAULT_PITCH | FF_DONTCARE, L"Arial", &font);
+	}
+
+	RECT rect = { pos.x, pos.y, pos.x + fontHeight * text.size(), pos.y + fontHeight };
+	font->DrawTextA(NULL, text.c_str(), -1, &rect, DT_LEFT, D3DCOLOR_RGBA((int)color.r, (int)color.g, (int)color.b, (int)color.a));
+
+}
+
+bool DX::WorldToScreen(const glm::vec3& pos, const glm::mat4& matrix, glm::vec2& output) {
+
+	glm::vec4 product = glm::vec4(pos, 1.0f) * matrix;
 	if (product.w < 0.1) {
 		return false;
 	}

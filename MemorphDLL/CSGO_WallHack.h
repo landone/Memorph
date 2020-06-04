@@ -17,18 +17,24 @@ public:
 private:
 
 	void aimAt(unsigned long ent);
-	glm::vec3 getBonePos(unsigned long ent, int bone);
+	glm::vec3 getBonePos(unsigned long boneMat, int bone);
+	void drawCrosshair();
+
+	int crosshairLength = 4;
+	int crosshairWidth = 2;
+	glm::vec4 crosshairColor = glm::vec4(255, 255, 255, 255);
+	std::vector<unsigned long> targets;
+	std::mutex targetMutex;
+	bool inGame = false;
 
 	float* viewMatrix = nullptr;
 	float* myPos = nullptr;
-	std::vector<unsigned long> targets;
 	unsigned long clientBase;
 	unsigned long engineBase;
 	unsigned long entList;
 	unsigned long* localPlayerPtr;
-	bool inGame = false;
 	int* myTeam;
 	int* myObserveMode;
-	std::mutex targetMutex;
+	unsigned long myBoneMat;
 
 };

@@ -2,6 +2,8 @@
 
 #include <glm/glm.hpp>
 #include <d3d9.h>
+#include <d3dx9.h>
+#include <string>
 
 class DX {
 public:
@@ -9,9 +11,12 @@ public:
 	static bool HookEndScene(void (*callback)());
 	static void UnhookEndScene();
 
-	static bool WorldToScreen(const glm::vec4& pos, const glm::mat4& matrix, glm::vec2& output);
+	static bool WorldToScreen(const glm::vec3& pos, const glm::mat4& matrix, glm::vec2& output);
 	static void DrawFillRect(glm::vec2 pos, glm::vec2 dim, glm::vec4 color);
 	static void DrawLine(glm::vec2 pos, glm::vec2 pos2, int width, glm::vec4 color);
+	static void WriteText(glm::vec2 pos, std::string text, glm::vec4 color);
+
+	static glm::vec2 GetWindowDim() { return glm::vec2(windowDim[0], windowDim[1]); }
 
 private:
 
@@ -23,6 +28,8 @@ private:
 	static HWND GetProcessWindow();
 
 	static HWND window;
+	static ID3DXFont* font;
+	static float fontHeight;
 	/* Window dimensions */
 	static int windowDim[2];
 	static LPDIRECT3DDEVICE9 pDevice;

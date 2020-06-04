@@ -84,8 +84,6 @@ void TF2_WallHack::OnThink() {
 				targetMutex.lock();
 				targets.push_back((float*)(entAdr + TF2::m_vecOrigin));
 				targetMutex.unlock();
-				unsigned long ragd = *((unsigned long*)(entAdr + TF2::m_hRagdoll));
-				printf("Ragdoll: 0x%X\n", ragd);
 				//float angle = atan2f(pos[1] - myPos[1], pos[0] - myPos[0]) * 180.0f / 3.14159f;
 				//viewAngles[1] = angle;
 
@@ -104,23 +102,7 @@ void TF2_WallHack::OnDraw() {
 	}
 
 	glm::mat4 viewMat;
-	memcpy(&viewMat[0][0], viewMatrix, sizeof(float) * 16);
-	if (myPos) {
-		glm::vec4 targPos;
-		targPos.x = myPos[0];
-		targPos.y = myPos[1];
-		targPos.z = *((float*)(0x729EE2A8));
-		targPos.w = 1;
-
-		glm::vec2 output;
-		if (DX::WorldToScreen(targPos, viewMat, output)) {
-			glm::vec2 output2;
-			DX::WorldToScreen(targPos + glm::vec4(0, 0, 15, 0), viewMat, output2);
-			int size = output.y - output2.y;
-			DX::DrawFillRect(output - glm::vec2(size / 2, size), glm::vec2(size, size), glm::vec4(255, 0, 0, 255));
-		}
-	}
-	/*targetMutex.lock();
+	memcpy(&viewMat[0][0], viewMatrix, sizeof(float) * 16);targetMutex.lock();
 	for (int i = 0; i < targets.size(); i++) {
 		glm::vec4 targetPos;
 		targetPos.x = targets[i][0];
@@ -138,7 +120,7 @@ void TF2_WallHack::OnDraw() {
 
 		}
 	}
-	targetMutex.unlock();*/
+	targetMutex.unlock();
 
 	attackMutex.lock();
 	if (attacked) {
