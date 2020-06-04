@@ -23,6 +23,62 @@ void TF2_WallHack::OnEnd() {
 
 }
 
+glm::vec3 TF2_WallHack::getBonePos(unsigned long boneMat, int bone) {
+
+	glm::vec3 bonePos;
+	bonePos.x = *(float*)(boneMat + 0x30 * bone + 0x0C);
+	bonePos.y = *(float*)(boneMat + 0x30 * bone + 0x1C);
+	bonePos.z = *(float*)(boneMat + 0x30 * bone + 0x2C);
+	return bonePos;
+
+}
+
+void TF2_WallHack::drawBones(unsigned long ent, const glm::mat4& viewMat) {
+
+	unsigned long boneMat = *((unsigned long*)(ent + TF2::dwBoneMatrix));
+	int entClass = *((int*)(ent + TF2::m_iClass));
+	if (entClass == TF2::Class_Spy) {
+		/* Draw bones for disguise instead */
+		int disguise = *((int*)(ent + TF2::m_nDisguiseClass));
+		if (disguise > 0) {
+			entClass = disguise;
+		}
+	}
+
+	glm::vec2 lastPos;
+	if (!DX::WorldToScreen(getBonePos(boneMat, TF2::BoneOrder[entClass][0]), viewMat, lastPos)) {
+		return;
+	}
+
+	float health = *((int*)(ent + TF2::m_iHealth)) / (float)(*((int*)(ent + TF2::m_iMaxHealth)));
+	glm::vec4 color = glm::vec4(255 * (1 - health), 255 * (health), 0, 255);
+
+	for (int j = 1; j < TF2::BoneOrderSize; j++) {
+
+		/* Adjust for bone hopping */
+		int changeLast = -1;
+		switch (j - 1) {
+		case TF2::Bone_LeftArmEnd:
+		case TF2::Bone_RightArmEnd:
+			changeLast = TF2::Bone_ProfileEnd;
+			break;
+		case TF2::Bone_LeftLegEnd:
+			changeLast = TF2::Bone_TorsoEnd;
+			break;
+		}
+		if (changeLast != -1) {
+			DX::WorldToScreen(getBonePos(boneMat, TF2::BoneOrder[entClass][changeLast]), viewMat, lastPos);
+		}
+
+		glm::vec2 bonePos;
+		DX::WorldToScreen(getBonePos(boneMat, TF2::BoneOrder[entClass][j]), viewMat, bonePos);
+		DX::DrawLine(lastPos, bonePos, 2, color);
+		lastPos = bonePos;
+
+	}
+
+}
+
 void TF2_WallHack::OnThink() {
 
 	targetMutex.lock();
@@ -67,7 +123,10 @@ void TF2_WallHack::OnThink() {
 
 	}
 
-	//float* viewAngles = ((float*)(engineBase + TF2::dwViewAngles));
+	glm::mat4 viewMat;
+	memcpy(&viewMat[0][0], viewMatrix, sizeof(float) * 16);
+	float closestDist = INFINITY;
+	closestTarget = NULL;
 	for (int i = 1; i <= TF2::MAX_PLAYERS; i++) {
 
 		unsigned long& entAdr = *((unsigned long*)(entList + i * TF2::entityRefSize));
@@ -82,10 +141,18 @@ void TF2_WallHack::OnThink() {
 			if (team > 1 && team != (*myTeam)) {
 
 				targetMutex.lock();
-				targets.push_back((float*)(entAdr + TF2::m_vecOrigin));
+				targets.push_back(i);
+
+				unsigned long boneMat = *((unsigned long*)(entAdr + TF2::dwBoneMatrix));
+				glm::vec2 targScreen;
+				if (DX::WorldToScreen(getBonePos(boneMat, 6), viewMat, targScreen)) {
+					float dist = glm::distance(targScreen, DX::GetWindowDim() * 0.5f);
+					if (dist < closestDist) {
+						closestDist = dist;
+						closestTarget = entAdr;
+					}
+				}
 				targetMutex.unlock();
-				//float angle = atan2f(pos[1] - myPos[1], pos[0] - myPos[0]) * 180.0f / 3.14159f;
-				//viewAngles[1] = angle;
 
 			}
 
@@ -102,23 +169,35 @@ void TF2_WallHack::OnDraw() {
 	}
 
 	glm::mat4 viewMat;
-	memcpy(&viewMat[0][0], viewMatrix, sizeof(float) * 16);targetMutex.lock();
+	memcpy(&viewMat[0][0], viewMatrix, sizeof(float) * 16);
+	targetMutex.lock();
 	for (int i = 0; i < targets.size(); i++) {
-		glm::vec4 targetPos;
-		targetPos.x = targets[i][0];
-		targetPos.y = targets[i][1];
-		targetPos.z = targets[i][2];
-		targetPos.w = 1;
+		
+		unsigned long targ = *((unsigned long*)(entList + targets[i] * TF2::entityRefSize));
+		if (targ == NULL) {
+			continue;
+		}
+		if (targ == closestTarget) {
+			drawBones(closestTarget, viewMat);
+		}
+		else {
 
-		glm::vec2 output;
-		if (DX::WorldToScreen(targetPos, viewMat, output)) {
+			float health = *((int*)(targ + TF2::m_iHealth)) / (float)(*((int*)(targ + TF2::m_iMaxHealth)));
+			glm::vec4 color = glm::vec4(255 * (1 - health), 255 * (health), 0, 255);
+			float* targOrig = ((float*)(targ + TF2::m_vecOrigin));
 
-			glm::vec2 output2;
-			DX::WorldToScreen(targetPos + glm::vec4(0, 0, 45, 0), viewMat, output2);
-			int size = output.y - output2.y;
-			DX::DrawFillRect(output - glm::vec2(size / 6, size), glm::vec2(size / 3, size), glm::vec4(255, 0, 0, 255));
+			glm::vec2 targPos;
+			if (DX::WorldToScreen(glm::vec3(targOrig[0], targOrig[1], targOrig[2]), viewMat, targPos)) {
+
+				glm::vec2 targPos2;
+				DX::WorldToScreen(glm::vec3(targOrig[0], targOrig[1], targOrig[2] + 45.0f), viewMat, targPos2);
+				float height = abs(targPos.y - targPos2.y);
+				DX::DrawFillRect(targPos - glm::vec2(height / 6.0f, height), glm::vec2(height / 3.0f, height), color);
+
+			}
 
 		}
+
 	}
 	targetMutex.unlock();
 

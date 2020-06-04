@@ -18,12 +18,14 @@ private:
 
 	void aimAt(unsigned long ent);
 	glm::vec3 getBonePos(unsigned long boneMat, int bone);
+	void drawBones(unsigned long ent, const glm::mat4& viewMat);
 	void drawCrosshair();
 
 	int crosshairLength = 4;
 	int crosshairWidth = 2;
 	glm::vec4 crosshairColor = glm::vec4(255, 255, 255, 255);
 	std::vector<unsigned long> targets;
+	unsigned long closestTarget = NULL;
 	std::mutex targetMutex;
 	bool inGame = false;
 

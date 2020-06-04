@@ -170,3 +170,23 @@ unsigned long MemProc::GetModuleBaseAddress(unsigned long procId, std::string ra
 	CloseHandle(hSnap);
 	return modBaseAddr;
 }
+
+void MemProc::printModules()
+{
+	HANDLE hSnap = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE | TH32CS_SNAPMODULE32, GetCurrentProcessId());
+	if (hSnap != INVALID_HANDLE_VALUE)
+	{
+		MODULEENTRY32 modEntry;
+		modEntry.dwSize = sizeof(modEntry);
+		std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+		if (Module32First(hSnap, &modEntry))
+		{
+			do
+			{
+				std::string str = converter.to_bytes(modEntry.szModule);
+				std::cout << str << std::endl;
+			} while (Module32Next(hSnap, &modEntry));
+		}
+	}
+	CloseHandle(hSnap);
+}

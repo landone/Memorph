@@ -7,10 +7,10 @@
 #include "CSGO_WallHack.h"
 #include "DX.h"
 
-//TF2_WallHack wallHack;
-CSGO_WallHack wallHack;
+TF2_WallHack hack;
+//CSGO_WallHack hack;
 std::vector<Hack*> hacks = {
-	&wallHack
+	&hack
 };
 
 void hkEndScene() {

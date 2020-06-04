@@ -83,6 +83,10 @@ void CSGO_WallHack::OnThink() {
 
 	}
 
+	glm::mat4 viewMat;
+	memcpy(&viewMat[0][0], viewMatrix, sizeof(float) * 16);
+	float closestDist = INFINITY;
+	closestTarget = NULL;
 	for (int i = 1; i <= CSGO::MAX_PLAYERS; i++) {
 
 		unsigned long& entAdr = *((unsigned long*)(entList + i * CSGO::entityRefSize));
@@ -98,6 +102,16 @@ void CSGO_WallHack::OnThink() {
 
 				targetMutex.lock();
 				targets.push_back(entAdr);
+
+				unsigned long boneMat = *((unsigned long*)(entAdr + CSGO::m_dwBoneMatrix));
+				glm::vec2 targScreen;
+				if (DX::WorldToScreen(getBonePos(boneMat, 8), viewMat, targScreen)) {
+					float dist = glm::distance(targScreen, DX::GetWindowDim() * 0.5f);
+						if (dist < closestDist) {
+							closestDist = dist;
+							closestTarget = entAdr;
+						}
+				}
 				targetMutex.unlock();
 
 			}
@@ -120,42 +134,69 @@ void CSGO_WallHack::OnDraw() {
 	targetMutex.lock();
 	for (int i = 0; i < targets.size(); i++) {
 
-		unsigned long boneMat = *((unsigned long*)(targets[i] + CSGO::m_dwBoneMatrix));
-		glm::vec2 lastPos;
-		if (!DX::WorldToScreen(getBonePos(boneMat, CSGO::BoneOrder[0]), viewMat, lastPos)) {
-			continue;
+		if (targets[i] == closestTarget) {
+			drawBones(closestTarget, viewMat);
 		}
+		else {
+
+			float health = *((int*)(targets[i] + CSGO::m_iHealth)) / 100.0f;
+			glm::vec4 color = glm::vec4(255 * (1 - health), 255 * (health), 0, 255);
+			float* targOrig = ((float*)(targets[i] + CSGO::m_vecOrigin));
+
+			glm::vec2 targPos;
+			if (DX::WorldToScreen(glm::vec3(targOrig[0], targOrig[1], targOrig[2]), viewMat, targPos)) {
+
+				glm::vec2 targPos2;
+				DX::WorldToScreen(glm::vec3(targOrig[0], targOrig[1], targOrig[2] + 45.0f), viewMat, targPos2);
+				float height = abs(targPos.y - targPos2.y);
+				DX::DrawFillRect(targPos - glm::vec2(height / 6.0f, height), glm::vec2(height / 3.0f, height), color);
+
+			}
+
+		}
+
 		
-		float health = *((int*)(targets[i] + CSGO::m_iHealth)) / 100.0f;
-		glm::vec4 color = glm::vec4(255 * (1 - health), 255 * (health), 0, 255);
-
-		for (int j = 1; j < CSGO::BoneOrderSize; j++) {
-
-			/* Adjust for bone hopping */
-			int changeLast = -1;
-			switch (j - 1) {
-			case CSGO::Bone_LeftArmEnd:
-			case CSGO::Bone_RightArmEnd:
-				changeLast = CSGO::Bone_ProfileEnd;
-				break;
-			case CSGO::Bone_LeftLegEnd:
-				changeLast = CSGO::Bone_TorsoEnd;
-				break;
-			}
-			if (changeLast != -1) {
-				DX::WorldToScreen(getBonePos(boneMat, CSGO::BoneOrder[changeLast]), viewMat, lastPos);
-			}
-
-			glm::vec2 bonePos;
-			DX::WorldToScreen(getBonePos(boneMat, CSGO::BoneOrder[j]), viewMat, bonePos);
-			DX::DrawLine(lastPos, bonePos, 2, color);
-			lastPos = bonePos;
-
-		}
 
 	}
 	targetMutex.unlock();
 
 	drawCrosshair();
+
+}
+
+void CSGO_WallHack::drawBones(unsigned long ent, const glm::mat4& viewMat) {
+
+	unsigned long boneMat = *((unsigned long*)(ent + CSGO::m_dwBoneMatrix));
+	glm::vec2 lastPos;
+	if (!DX::WorldToScreen(getBonePos(boneMat, CSGO::BoneOrder[0]), viewMat, lastPos)) {
+		return;
+	}
+
+	float health = *((int*)(ent + CSGO::m_iHealth)) / 100.0f;
+	glm::vec4 color = glm::vec4(255 * (1 - health), 255 * (health), 0, 255);
+
+	for (int j = 1; j < CSGO::BoneOrderSize; j++) {
+
+		/* Adjust for bone hopping */
+		int changeLast = -1;
+		switch (j - 1) {
+		case CSGO::Bone_LeftArmEnd:
+		case CSGO::Bone_RightArmEnd:
+			changeLast = CSGO::Bone_ProfileEnd;
+			break;
+		case CSGO::Bone_LeftLegEnd:
+			changeLast = CSGO::Bone_TorsoEnd;
+			break;
+		}
+		if (changeLast != -1) {
+			DX::WorldToScreen(getBonePos(boneMat, CSGO::BoneOrder[changeLast]), viewMat, lastPos);
+		}
+
+		glm::vec2 bonePos;
+		DX::WorldToScreen(getBonePos(boneMat, CSGO::BoneOrder[j]), viewMat, bonePos);
+		DX::DrawLine(lastPos, bonePos, 2, color);
+		lastPos = bonePos;
+
+	}
 
 }

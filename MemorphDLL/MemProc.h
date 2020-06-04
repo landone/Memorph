@@ -14,6 +14,7 @@ public:
 	bool attach(std::string exeFile);
 
 	unsigned long getModule(std::string name);
+	void printModules();
 	/* Get module address from current process */
 	static unsigned long getCurrentModule(std::string name);
 	bool write(const void* src, int len, unsigned long addr);
