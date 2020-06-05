@@ -14,14 +14,26 @@ std::vector<Hack*> hacks = {
 };
 
 void hkEndScene() {
+
 	for (int i = 0; i < hacks.size(); i++) {
 		hacks[i]->OnDraw();
 	}
+
+	static int thinkCounter = 0;
+	static const int thinkLimit = 5;
+	thinkCounter++;
+	if (thinkCounter == thinkLimit) {
+
+		thinkCounter = 0;
+		for (int i = 0; i < hacks.size(); i++) {
+			hacks[i]->OnThink();
+		}
+
+	}
+
 }
 
 DWORD WINAPI HackThread(HMODULE hModule) {
-
-	DX::HookEndScene(hkEndScene);
 
 	AllocConsole();
 	FILE* f;
@@ -32,6 +44,8 @@ DWORD WINAPI HackThread(HMODULE hModule) {
 		hacks[i]->OnStart();
 	}
 
+	DX::HookEndScene(hkEndScene);
+
 	while (true) {
 
 		if (GetAsyncKeyState(VK_END) & 1) {
@@ -39,19 +53,15 @@ DWORD WINAPI HackThread(HMODULE hModule) {
 			break;
 		}
 
-		for (int i = 0; i < hacks.size(); i++) {
-			hacks[i]->OnThink();
-		}
-
 		Sleep(12);
 
 	}
 
+	DX::UnhookEndScene();
+
 	for (int i = 0; i < hacks.size(); i++) {
 		hacks[i]->OnEnd();
 	}
-
-	DX::UnhookEndScene();
 
 	if (f != 0) {
 		fclose(f);

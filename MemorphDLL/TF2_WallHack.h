@@ -19,9 +19,10 @@ private:
 	glm::vec3 getBonePos(unsigned long boneMat, int bone);
 	void drawBones(unsigned long ent, const glm::mat4& viewMat);
 
-	float* viewMatrix = nullptr;
+	float* viewMatrixPtr = nullptr;
 	float* myPos = nullptr;
 	std::vector<unsigned long> targets;
+	glm::mat4 viewMat = glm::mat4(1.0f);
 	unsigned long clientBase;
 	unsigned long engineBase;
 	unsigned long entList;
@@ -29,10 +30,7 @@ private:
 	bool inGame = false;
 	int* myTeam;
 	int* myClass;
-	int* myObserveMode;
 	bool attacked = false;
-	std::mutex targetMutex;
-	std::mutex attackMutex;
 	unsigned long closestTarget = NULL;
 
 };

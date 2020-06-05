@@ -13,7 +13,7 @@ void TF2_WallHack::OnStart() {
 	engineBase = MemProc::getCurrentModule(TF2::engineDllName);
 	entList = clientBase + TF2::dwEntityList;
 	localPlayerPtr = (unsigned long*)(clientBase + TF2::dwLocalPlayer);
-	viewMatrix = (float*)(engineBase + TF2::dwViewMatrix);
+	viewMatrixPtr = (float*)(engineBase + TF2::dwViewMatrix);
 
 }
 
@@ -53,6 +53,7 @@ void TF2_WallHack::drawBones(unsigned long ent, const glm::mat4& viewMat) {
 	float health = *((int*)(ent + TF2::m_iHealth)) / (float)(*((int*)(ent + TF2::m_iMaxHealth)));
 	glm::vec4 color = glm::vec4(255 * (1 - health), 255 * (health), 0, 255);
 
+
 	for (int j = 1; j < TF2::BoneOrderSize; j++) {
 
 		/* Adjust for bone hopping */
@@ -71,9 +72,10 @@ void TF2_WallHack::drawBones(unsigned long ent, const glm::mat4& viewMat) {
 		}
 
 		glm::vec2 bonePos;
-		DX::WorldToScreen(getBonePos(boneMat, TF2::BoneOrder[entClass][j]), viewMat, bonePos);
-		DX::DrawLine(lastPos, bonePos, 2, color);
-		lastPos = bonePos;
+		if (DX::WorldToScreen(getBonePos(boneMat, TF2::BoneOrder[entClass][j]), viewMat, bonePos)) {
+			DX::DrawLine(lastPos, bonePos, 2, color);
+			lastPos = bonePos;
+		}
 
 	}
 
@@ -81,9 +83,7 @@ void TF2_WallHack::drawBones(unsigned long ent, const glm::mat4& viewMat) {
 
 void TF2_WallHack::OnThink() {
 
-	targetMutex.lock();
 	targets.clear();
-	targetMutex.unlock();
 
 	if ((*localPlayerPtr) == NULL) {
 		inGame = false;
@@ -95,7 +95,6 @@ void TF2_WallHack::OnThink() {
 		inGame = true;
 
 		myPos = ((float*)((*localPlayerPtr) + TF2::m_vecOrigin));
-		myObserveMode = ((int*)((*localPlayerPtr) + TF2::m_iObserverMode));
 		myTeam = ((int*)((*localPlayerPtr) + TF2::m_iTeam));
 		myClass = ((int*)((*localPlayerPtr) + TF2::m_iClass));
 
@@ -113,9 +112,7 @@ void TF2_WallHack::OnThink() {
 
 				int& attack = *((int*)(clientBase + TF2::dwAttack));
 				attack = 5;
-				attackMutex.lock();
 				attacked = true;
-				attackMutex.unlock();
 
 			}
 
@@ -123,8 +120,6 @@ void TF2_WallHack::OnThink() {
 
 	}
 
-	glm::mat4 viewMat;
-	memcpy(&viewMat[0][0], viewMatrix, sizeof(float) * 16);
 	float closestDist = INFINITY;
 	closestTarget = NULL;
 	for (int i = 1; i <= TF2::MAX_PLAYERS; i++) {
@@ -140,19 +135,20 @@ void TF2_WallHack::OnThink() {
 			int& team = *((int*)(entAdr + TF2::m_iTeam));
 			if (team > 1 && team != (*myTeam)) {
 
-				targetMutex.lock();
 				targets.push_back(i);
 
 				unsigned long boneMat = *((unsigned long*)(entAdr + TF2::dwBoneMatrix));
+				float* entOrig = ((float*)(entAdr + TF2::m_vecOrigin));
+				/* 45.0f added to Z axis to approximate center without relying on bones */
+				glm::vec3 entPos(entOrig[0], entOrig[1], entOrig[2] + 45.0f);
 				glm::vec2 targScreen;
-				if (DX::WorldToScreen(getBonePos(boneMat, 6), viewMat, targScreen)) {
+				if (DX::WorldToScreen(entPos, viewMat, targScreen)) {
 					float dist = glm::distance(targScreen, DX::GetWindowDim() * 0.5f);
 					if (dist < closestDist) {
 						closestDist = dist;
 						closestTarget = entAdr;
 					}
 				}
-				targetMutex.unlock();
 
 			}
 
@@ -164,13 +160,11 @@ void TF2_WallHack::OnThink() {
 
 void TF2_WallHack::OnDraw() {
 
-	if (!inGame) {
+	if (!inGame || !(*localPlayerPtr)) {
 		return;
 	}
 
-	glm::mat4 viewMat;
-	memcpy(&viewMat[0][0], viewMatrix, sizeof(float) * 16);
-	targetMutex.lock();
+	memcpy(&viewMat[0][0], viewMatrixPtr, sizeof(float) * 16);
 	for (int i = 0; i < targets.size(); i++) {
 		
 		unsigned long targ = *((unsigned long*)(entList + targets[i] * TF2::entityRefSize));
@@ -199,14 +193,11 @@ void TF2_WallHack::OnDraw() {
 		}
 
 	}
-	targetMutex.unlock();
 
-	attackMutex.lock();
 	if (attacked) {
 		int& attack = *((int*)(clientBase + TF2::dwAttack));
 		attack = 4;
 		attacked = false;
 	}
-	attackMutex.unlock();
 
 }
