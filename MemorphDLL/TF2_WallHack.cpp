@@ -45,18 +45,15 @@ void TF2_WallHack::drawBones(unsigned long ent, const glm::mat4& viewMat) {
 		}
 	}
 
-	glm::vec2 lastPos;
-	if (!DX::WorldToScreen(getBonePos(boneMat, TF2::BoneOrder[entClass][0]), viewMat, lastPos)) {
-		return;
-	}
-
 	float health = *((int*)(ent + TF2::m_iHealth)) / (float)(*((int*)(ent + TF2::m_iMaxHealth)));
 	glm::vec4 color = glm::vec4(255 * (1 - health), 255 * (health), 0, 255);
 
+	glm::vec2 lastScrPos = glm::vec2(0,0);
+	glm::vec3 lastPos = glm::vec3(0,0,0);
 
-	for (int j = 1; j < TF2::BoneOrderSize; j++) {
+	for (int j = 0; j < TF2::BoneOrderSize; j++) {
 
-		/* Adjust for bone hopping */
+		/* Adjust for bone index hopping */
 		int changeLast = -1;
 		switch (j - 1) {
 		case TF2::Bone_LeftArmEnd:
@@ -68,14 +65,23 @@ void TF2_WallHack::drawBones(unsigned long ent, const glm::mat4& viewMat) {
 			break;
 		}
 		if (changeLast != -1) {
-			DX::WorldToScreen(getBonePos(boneMat, TF2::BoneOrder[entClass][changeLast]), viewMat, lastPos);
+			lastPos = getBonePos(boneMat, TF2::BoneOrder[entClass][changeLast]);
+			DX::WorldToScreen(lastPos, viewMat, lastScrPos);
 		}
 
-		glm::vec2 bonePos;
-		if (DX::WorldToScreen(getBonePos(boneMat, TF2::BoneOrder[entClass][j]), viewMat, bonePos)) {
-			DX::DrawLine(lastPos, bonePos, 2, color);
-			lastPos = bonePos;
+		glm::vec3 bonePos = getBonePos(boneMat, TF2::BoneOrder[entClass][j]);
+		glm::vec2 boneScrPos;
+		if (bonePos != glm::vec3(0, 0, 0) && lastPos != glm::vec3(0, 0, 0)) {
+			if (DX::WorldToScreen(bonePos, viewMat, boneScrPos)) {
+				DX::DrawLine(lastScrPos, boneScrPos, 2, color);
+			}
 		}
+		else {
+			DX::WorldToScreen(bonePos, viewMat, boneScrPos);
+		}
+
+		lastScrPos = boneScrPos;
+		lastPos = bonePos;
 
 	}
 
@@ -104,16 +110,18 @@ void TF2_WallHack::OnThink() {
 
 		int& activeWep = *((int*)((*localPlayerPtr) + TF2::m_hActiveWeapon));
 		int& meleeWep = *((int*)((*localPlayerPtr) + TF2::m_hMyWeapons + TF2::handleSize));
-		if (activeWep == meleeWep) {
+		if (activeWep == meleeWep && activeWep != NULL) {
 
 			unsigned long& wepBase = *((unsigned long*)(entList + (activeWep & 0xFFF) * TF2::entityRefSize));
-			bool& ready = *((bool*)(wepBase + TF2::m_bReadyToBackstab));
-			if (ready) {
+			if (wepBase != NULL) {
+				bool& ready = *((bool*)(wepBase + TF2::m_bReadyToBackstab));
+				if (ready) {
 
-				int& attack = *((int*)(clientBase + TF2::dwAttack));
-				attack = 5;
-				attacked = true;
+					int& attack = *((int*)(clientBase + TF2::dwAttack));
+					attack = 5;
+					attacked = true;
 
+				}
 			}
 
 		}
