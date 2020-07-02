@@ -3,6 +3,23 @@
 const std::string TF2::processName = "hl2.exe";
 const std::string TF2::clientDllName = "client.dll";
 const std::string TF2::engineDllName = "engine.dll";
+
+unsigned long TF2::dwEntityList = NULL;
+unsigned long TF2::dwLocalPlayer = NULL;
+unsigned long TF2::dwAttack = NULL;
+unsigned long TF2::dwIsInGame = NULL;
+unsigned long TF2::dwViewAngles = NULL;
+
+std::vector<MemProc::Signature> TF2::signatures = {
+	MemProc::Signature {
+		(unsigned char*)"\xA1\x00\x00\x00\x00\x33\xC9\x83\xC4\x04",
+		(char*)"x????xxxxx",
+		MemProc::ScanType::READ,
+		1,
+		(&TF2::dwLocalPlayer)
+	}
+};
+
 const int TF2::BoneOrder[10][17] = {
 	{
 		0,0,0,0,
@@ -105,6 +122,20 @@ static std::string TeamNames[] = {
 	"RED",
 	"BLUE"
 };
+
+void TF2::Initialize() {
+
+	unsigned long clientSz;
+	unsigned long clientBase = MemProc::getCurrentModule(clientDllName, &clientSz);
+
+	for (unsigned int i = 0; i < signatures.size(); i++) {
+
+		MemProc::Signature& s = signatures[i];
+		(*s.resultPtr) = MemProc::FindAddress(clientBase, clientSz, s.sig, s.mask, s.type, s.offset);
+
+	}
+
+}
 
 std::string TF2::ClassToString(int type) {
 

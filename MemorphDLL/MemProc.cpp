@@ -21,6 +21,89 @@ MemProc::MemProc(std::string exeFile) : MemProc() {
 
 }
 
+unsigned long MemProc::FindAddress(unsigned long mod, unsigned long modSize, const unsigned char* sig, const char* mask, ScanType def, unsigned long extra) {
+
+	HANDLE hProc = OpenProcess(PROCESS_ALL_ACCESS, FALSE, GetCurrentProcessId());
+	if (hProc == NULL) {
+		std::cout << "Failed opening process for signatures" << std::endl;
+		return NULL;
+	}
+
+	unsigned long result = FindSignature(mod, modSize, sig, mask);
+
+	if (def == ScanType::READ) {
+
+		ReadProcessMemory(hProc, (LPCVOID)(result + extra), (LPVOID)&result, sizeof(result), NULL);
+		result -= mod;
+
+	}
+	else if (def == ScanType::SUBTRACT) {
+
+		result -= mod;
+
+	}
+
+	CloseHandle(hProc);
+	return result;
+
+}
+
+bool MemProc::DataCompare(unsigned char* data, const unsigned char* sign, const char* mask) {
+
+	for (; *mask; mask++, sign++, data++) {
+
+		if (*mask == 'x' && *data != *sign) {
+			return false;
+		}
+
+	}
+
+	return true;
+
+}
+
+unsigned long MemProc::FindSignature(unsigned long base, unsigned long size, const unsigned char* sign, const char* mask) {
+
+	HANDLE hProc = OpenProcess(PROCESS_ALL_ACCESS, FALSE, GetCurrentProcessId());
+	if (hProc == NULL) {
+		std::cout << "Failed opening process for signatures" << std::endl;
+		return NULL;
+	}
+
+	MEMORY_BASIC_INFORMATION mbi = { 0 };
+	DWORD offset = 0;
+	while (offset < size) {
+
+		VirtualQueryEx(hProc, (LPCVOID)(base + offset), &mbi, sizeof(MEMORY_BASIC_INFORMATION));
+		if (mbi.State != MEM_FREE) {
+
+			unsigned char* buffer = new unsigned char[mbi.RegionSize];
+			ReadProcessMemory(hProc, mbi.BaseAddress, buffer, mbi.RegionSize, NULL);
+			for (int i = 0; i < mbi.RegionSize; i++) {
+
+				if (DataCompare(buffer + i, sign, mask)) {
+
+					delete[] buffer;
+					CloseHandle(hProc);
+					return (unsigned long)mbi.BaseAddress + i;
+
+				}
+
+			}
+
+			delete[] buffer;
+
+		}
+
+		offset += mbi.RegionSize;
+
+	}
+
+	CloseHandle(hProc);
+	return NULL;
+
+}
+
 bool MemProc::write(const void* src, int len, unsigned long addr) {
 
 	return WriteProcessMemory(handle, (LPVOID)addr, src, len, 0);
@@ -33,9 +116,9 @@ bool MemProc::read(const void* dest, int len, unsigned long addr) {
 
 }
 
-unsigned long MemProc::getCurrentModule(std::string name) {
+unsigned long MemProc::getCurrentModule(std::string name, unsigned long* sizeBuf) {
 
-	return GetModuleBaseAddress(GetCurrentProcessId(), name);
+	return GetModuleBaseAddress(GetCurrentProcessId(), name, sizeBuf);
 
 }
 
@@ -144,7 +227,7 @@ unsigned long MemProc::GetProcId(std::string rawString)
 	return procId;
 }
 
-unsigned long MemProc::GetModuleBaseAddress(unsigned long procId, std::string rawString)
+unsigned long MemProc::GetModuleBaseAddress(unsigned long procId, std::string rawString, unsigned long* sizeBuf)
 {
 	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
 	std::wstring str = converter.from_bytes(rawString);
@@ -162,6 +245,9 @@ unsigned long MemProc::GetModuleBaseAddress(unsigned long procId, std::string ra
 				if (!_wcsicmp(modEntry.szModule, modName))
 				{
 					modBaseAddr = (uintptr_t)modEntry.modBaseAddr;
+					if (sizeBuf != nullptr) {
+						(*sizeBuf) = modEntry.modBaseSize;
+					}
 					break;
 				}
 			} while (Module32Next(hSnap, &modEntry));

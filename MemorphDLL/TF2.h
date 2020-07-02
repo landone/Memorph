@@ -1,9 +1,14 @@
 #pragma once
 
 #include <string>
+#include <vector>
+#include "MemProc.h"
 
 class TF2 {
 public:
+
+	static std::vector<MemProc::Signature> signatures;
+	static void Initialize();
 
 	enum Class {
 		Class_None = 0,
@@ -50,12 +55,13 @@ public:
 	static const int Bone_LeftLegEnd = 14;
 	static const int Bone_RightLegEnd = 16;
 
-	static const unsigned long dwEntityList = 0xC480A4;
-	static const unsigned long dwLocalPlayer = 0xC3A590;
-	static const unsigned long dwViewAngles = 0x46949C;
+	static unsigned long dwEntityList;
+	static unsigned long dwLocalPlayer;
+	static unsigned long dwAttack;
+	static unsigned long dwIsInGame;
+	static unsigned long dwViewAngles;
+
 	static const unsigned long dwViewMatrix = 0x59EB80;
-	static const unsigned long dwAttack = 0xC692EC;
-	static const unsigned long dwIsInGame = 0x5DAACC;
 	static const unsigned long dwBoneMatrix = 0x5B0;
 	static const unsigned long m_iHealth = 0xA8;
 	static const unsigned long m_iMaxHealth = 0x17A0;
