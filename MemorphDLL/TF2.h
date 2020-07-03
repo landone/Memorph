@@ -70,6 +70,7 @@ public:
 	static const unsigned long m_iClass = 0x154C;
 	static const unsigned long m_iTeam = 0xB0;
 	static const unsigned long m_vecOrigin = 0x364;
+	static const unsigned long m_vecViewOffset = 0xFC;
 	static const unsigned long m_bDucked = 0xE60;
 	static const unsigned long m_bJumping = 0x1A1C;
 	static const unsigned long m_nDisguiseTeam = 0x18F0;

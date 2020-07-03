@@ -31,6 +31,33 @@ void TF2_WallHack::OnEnd() {
 
 }
 
+void TF2_WallHack::aimAtHead(unsigned long target) {
+
+	if (target == NULL) {
+		return;
+	}
+
+	unsigned long boneMat = *((unsigned long*)(target + TF2::dwBoneMatrix));
+	int targClass = *((int*)(target + TF2::m_iClass));
+	if (targClass == TF2::Class_Spy) {
+		/* Aim at disguise head */
+		int disguise = *((int*)(target + TF2::m_nDisguiseClass));
+		if (disguise > 0) {
+			targClass = disguise;
+		}
+	}
+
+	glm::vec3 headPos = getBonePos(boneMat, TF2::BoneOrder[targClass][1]);
+	float* myViewOffs = (float*)((*localPlayerPtr) + TF2::m_vecViewOffset);
+	glm::vec3 myHead = glm::vec3(myPos[0] + myViewOffs[0], myPos[1] + myViewOffs[1], myPos[2] + myViewOffs[2]);
+	float* viewAng = (float*)(engineBase + TF2::dwViewAngles);
+
+	float flatDist = sqrtf(pow(headPos[0] - myHead[0], 2) + pow(headPos[1] - myHead[1], 2));
+	viewAng[0] = -atan2f(headPos[2] - myHead[2], flatDist) * 180.0f / 3.14159f;
+	viewAng[1] = atan2f(headPos[1] - myHead[1], headPos[0] - myHead[0]) * 180.0f / 3.14159f;
+
+}
+
 glm::vec3 TF2_WallHack::getBonePos(unsigned long boneMat, int bone) {
 
 	glm::vec3 bonePos;
@@ -154,7 +181,6 @@ void TF2_WallHack::OnThink() {
 
 				targets.push_back(i);
 
-				unsigned long boneMat = *((unsigned long*)(entAdr + TF2::dwBoneMatrix));
 				float* entOrig = ((float*)(entAdr + TF2::m_vecOrigin));
 				/* 45.0f added to Z axis to approximate center without relying on bones */
 				glm::vec3 entPos(entOrig[0], entOrig[1], entOrig[2] + 45.0f);
@@ -171,6 +197,22 @@ void TF2_WallHack::OnThink() {
 
 		}
 
+	}
+
+	static bool middleMouse = false;
+	if (GetAsyncKeyState(VK_MBUTTON) & 0x8000) {
+		/* On middle mouse button press */
+		if (!middleMouse) {
+			aimAtHead(closestTarget);
+			int& attack = *((int*)(clientBase + TF2::dwAttack));
+			attack = 5;
+			attacked = true;
+		}
+		middleMouse = true;
+
+	}
+	else {
+		middleMouse = false;
 	}
 
 }

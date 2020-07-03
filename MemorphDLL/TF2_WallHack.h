@@ -19,6 +19,8 @@ private:
 	glm::vec3 getBonePos(unsigned long boneMat, int bone);
 	void drawBones(unsigned long ent, const glm::mat4& viewMat);
 
+	void aimAtHead(unsigned long target);
+
 	float* viewMatrixPtr = nullptr;
 	float* myPos = nullptr;
 	std::vector<unsigned long> targets;
