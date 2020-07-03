@@ -125,15 +125,19 @@ static std::string TeamNames[] = {
 
 void TF2::Initialize() {
 
+	MemProc proc;
+
 	unsigned long clientSz;
-	unsigned long clientBase = MemProc::getCurrentModule(clientDllName, &clientSz);
+	unsigned long clientBase = proc.getModule(clientDllName, &clientSz);
 
 	for (unsigned int i = 0; i < signatures.size(); i++) {
 
 		MemProc::Signature& s = signatures[i];
-		(*s.resultPtr) = MemProc::FindAddress(clientBase, clientSz, s.sig, s.mask, s.type, s.offset);
+		(*s.resultPtr) = proc.FindAddress(clientBase, clientSz, s.sig, s.mask, s.type, s.offset);
 
 	}
+
+	proc.detach();
 
 }
 

@@ -11,7 +11,7 @@
 
 MemProc::MemProc() {
 
-
+	attachSelf();
 
 }
 
@@ -23,9 +23,7 @@ MemProc::MemProc(std::string exeFile) : MemProc() {
 
 unsigned long MemProc::FindAddress(unsigned long mod, unsigned long modSize, const unsigned char* sig, const char* mask, ScanType def, unsigned long extra) {
 
-	HANDLE hProc = OpenProcess(PROCESS_ALL_ACCESS, FALSE, GetCurrentProcessId());
-	if (hProc == NULL) {
-		std::cout << "Failed opening process for signatures" << std::endl;
+	if (!isAttached()) {
 		return NULL;
 	}
 
@@ -43,7 +41,6 @@ unsigned long MemProc::FindAddress(unsigned long mod, unsigned long modSize, con
 
 	}
 
-	CloseHandle(hProc);
 	return result;
 
 }
@@ -64,9 +61,7 @@ bool MemProc::DataCompare(unsigned char* data, const unsigned char* sign, const 
 
 unsigned long MemProc::FindSignature(unsigned long base, unsigned long size, const unsigned char* sign, const char* mask) {
 
-	HANDLE hProc = OpenProcess(PROCESS_ALL_ACCESS, FALSE, GetCurrentProcessId());
-	if (hProc == NULL) {
-		std::cout << "Failed opening process for signatures" << std::endl;
+	if (!isAttached()) {
 		return NULL;
 	}
 
@@ -84,7 +79,6 @@ unsigned long MemProc::FindSignature(unsigned long base, unsigned long size, con
 				if (DataCompare(buffer + i, sign, mask)) {
 
 					delete[] buffer;
-					CloseHandle(hProc);
 					return (unsigned long)mbi.BaseAddress + i;
 
 				}
@@ -99,36 +93,26 @@ unsigned long MemProc::FindSignature(unsigned long base, unsigned long size, con
 
 	}
 
-	CloseHandle(hProc);
 	return NULL;
 
 }
 
 bool MemProc::write(const void* src, int len, unsigned long addr) {
 
-	return WriteProcessMemory(handle, (LPVOID)addr, src, len, 0);
+	return WriteProcessMemory(hProc, (LPVOID)addr, src, len, 0);
 
 }
 
 bool MemProc::read(const void* dest, int len, unsigned long addr) {
 
-	return ReadProcessMemory(handle, (LPCVOID)addr, (LPVOID)dest, len, 0);
+	return ReadProcessMemory(hProc, (LPCVOID)addr, (LPVOID)dest, len, 0);
 
 }
 
-unsigned long MemProc::getCurrentModule(std::string name, unsigned long* sizeBuf) {
+bool MemProc::attachSelf() {
 
-	return GetModuleBaseAddress(GetCurrentProcessId(), name, sizeBuf);
-
-}
-
-unsigned long MemProc::getModule(std::string name) {
-
-	if (!isAttached()) {
-		return NULL;
-	}
-
-	return GetModuleBaseAddress(pid, name.c_str());
+	detach();
+	return openProc(GetCurrentProcessId());
 
 }
 
@@ -152,15 +136,8 @@ bool MemProc::attach(std::string exeFile) {
 		WideCharToMultiByte(CP_ACP, 0, procEnt.szExeFile, -1, name, 260, &DefChar, NULL);
 
 		if (!strcmp(exeFile.c_str(), name)) {
-			pid = procEnt.th32ProcessID;
-			handle = OpenProcess(PROCESS_ALL_ACCESS, FALSE, pid);
-			if (handle == NULL) {
-				std::cout << "Failed opening process" << std::endl;
-				CloseHandle(hProcSnap);
-				return false;
-			}
 			CloseHandle(hProcSnap);
-			return true;
+			return openProc(procEnt.th32ProcessID);
 		}
 
 	}
@@ -171,14 +148,29 @@ bool MemProc::attach(std::string exeFile) {
 
 }
 
+bool MemProc::openProc(unsigned long pid) {
+	
+	this->pid = pid;
+	hProc = OpenProcess(PROCESS_ALL_ACCESS, FALSE, pid);
+	if (hProc == NULL) {
+
+		std::cout << "Failed opening process" << std::endl;
+		return false;
+
+	}
+
+	return true;
+
+}
+
 bool MemProc::isAttached() {
 
-	if (handle == nullptr || pid <= 0) {
+	if (hProc == nullptr || pid <= 0) {
 		return false;
 	}
 
 	DWORD exitCode;
-	GetExitCodeProcess(handle, &exitCode);
+	GetExitCodeProcess(hProc, &exitCode);
 	if (exitCode != STILL_ACTIVE) {
 		detach();
 		return false;
@@ -190,50 +182,26 @@ bool MemProc::isAttached() {
 
 void MemProc::detach() {
 
-	if (handle != nullptr) {
-		CloseHandle(handle);
-		handle = nullptr;
+	if (hProc != nullptr) {
+		CloseHandle(hProc);
+		hProc = nullptr;
 		pid = 0;
 	}
 
 }
 
-unsigned long MemProc::GetProcId(std::string rawString)
+unsigned long MemProc::getModule(std::string rawString, unsigned long* sizeBuf)
 {
-	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-	std::wstring str = converter.from_bytes(rawString);
-	const wchar_t* procName = str.c_str();
-	DWORD procId = 0;
-	HANDLE hSnap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
-	if (hSnap != INVALID_HANDLE_VALUE)
-	{
-		PROCESSENTRY32 procEntry;
-		procEntry.dwSize = sizeof(procEntry);
 
-		if (Process32First(hSnap, &procEntry))
-		{
-			do
-			{
-				if (!_wcsicmp(procEntry.szExeFile, procName))
-				{
-					procId = procEntry.th32ProcessID;
-					break;
-				}
-			} while (Process32Next(hSnap, &procEntry));
-
-		}
+	if (!isAttached()) {
+		return NULL;
 	}
-	CloseHandle(hSnap);
-	return procId;
-}
 
-unsigned long MemProc::GetModuleBaseAddress(unsigned long procId, std::string rawString, unsigned long* sizeBuf)
-{
 	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
 	std::wstring str = converter.from_bytes(rawString);
 	const wchar_t* modName = str.c_str();
 	uintptr_t modBaseAddr = 0;
-	HANDLE hSnap = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE | TH32CS_SNAPMODULE32, procId);
+	HANDLE hSnap = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE | TH32CS_SNAPMODULE32, pid);
 	if (hSnap != INVALID_HANDLE_VALUE)
 	{
 		MODULEENTRY32 modEntry;

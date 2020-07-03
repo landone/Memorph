@@ -9,11 +9,15 @@
 
 void CSGO_WallHack::OnStart() {
 
-	clientBase = MemProc::getCurrentModule(CSGO::clientDllName);
-	engineBase = MemProc::getCurrentModule(CSGO::engineDllName);
+	MemProc proc;
+
+	clientBase = proc.getModule(CSGO::clientDllName);
+	engineBase = proc.getModule(CSGO::engineDllName);
 	entList = clientBase + CSGO::dwEntityList;
 	localPlayerPtr = (unsigned long*)(clientBase + CSGO::dwLocalPlayer);
 	viewMatrix = (float*)(clientBase + CSGO::dwViewMatrix);
+
+	proc.detach();
 
 }
 

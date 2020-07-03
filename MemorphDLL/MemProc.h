@@ -8,7 +8,7 @@ Utility for external program memory alteration.
 class MemProc {
 public:
 
-	enum ScanType {
+	enum class ScanType {
 		NONE,
 		READ,
 		SUBTRACT
@@ -27,14 +27,10 @@ public:
 	MemProc(std::string exeFile);
 
 	bool attach(std::string exeFile);
+	bool attachSelf();
 
-	unsigned long getModule(std::string name);
+	unsigned long getModule(std::string name, unsigned long* sizeBuf = nullptr);
 	void printModules();
-
-	/* Get module address from current process */
-	static unsigned long getCurrentModule(std::string name, unsigned long* sizeBuf = nullptr);
-
-	
 
 	bool write(const void* src, int len, unsigned long addr);
 	bool read(const void* dest, int len, unsigned long addr);
@@ -43,18 +39,18 @@ public:
 	void detach();
 
 	/* Find address in a module given a signature & mask */
-	static unsigned long FindAddress(unsigned long mod, unsigned long modSize, const unsigned char* sig, const char* mask, ScanType def, unsigned long extra = 0);
+	unsigned long FindAddress(unsigned long mod, unsigned long modSize, const unsigned char* sig, const char* mask, ScanType def, unsigned long extra = 0);
 
 private:
 
-	static unsigned long GetProcId(std::string procName);
-	static unsigned long GetModuleBaseAddress(unsigned long procId, std::string modName, unsigned long* sizeBuf = nullptr);
-
 	/* Find signature in current process memory */
-	static unsigned long FindSignature(unsigned long base, unsigned long size, const unsigned char* sign, const char* mask);
+	unsigned long FindSignature(unsigned long base, unsigned long size, const unsigned char* sign, const char* mask);
+	/* Check if signature matches data chunk */
 	static bool DataCompare(unsigned char* data, const unsigned char* sign, const char* mask);
 
-	void* handle = nullptr;
+	bool openProc(unsigned long pid);
+
+	void* hProc = nullptr;
 	unsigned long pid = 0;
 
 };

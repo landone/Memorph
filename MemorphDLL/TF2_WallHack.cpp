@@ -9,16 +9,20 @@
 
 void TF2_WallHack::OnStart() {
 
+	MemProc proc;
+
 	unsigned long clientSz = 0;
 	unsigned long engineSz = 0;
-	clientBase = MemProc::getCurrentModule(TF2::clientDllName, &clientSz);
-	engineBase = MemProc::getCurrentModule(TF2::engineDllName, &engineSz);
+	clientBase = proc.getModule(TF2::clientDllName, &clientSz);
+	engineBase = proc.getModule(TF2::engineDllName, &engineSz);
 	entList = clientBase + TF2::dwEntityList;
 	localPlayerPtr = (unsigned long*)(clientBase + TF2::dwLocalPlayer);
 	viewMatrixPtr = (float*)(engineBase + TF2::dwViewMatrix);
 
 	TF2::Initialize();
 	printf("Local Player:  0x%X\n", TF2::dwLocalPlayer);
+
+	proc.detach();
 
 }
 
