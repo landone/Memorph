@@ -6,17 +6,48 @@ const std::string TF2::engineDllName = "engine.dll";
 
 unsigned long TF2::dwEntityList = NULL;
 unsigned long TF2::dwLocalPlayer = NULL;
+unsigned long TF2::dwButtonBase = NULL;
 unsigned long TF2::dwAttack = NULL;
 unsigned long TF2::dwIsInGame = NULL;
 unsigned long TF2::dwViewAngles = NULL;
 
-std::vector<MemProc::Signature> TF2::signatures = {
+std::vector<MemProc::Signature> TF2::clientSigs = {
 	MemProc::Signature {
 		(unsigned char*)"\xA1\x00\x00\x00\x00\x33\xC9\x83\xC4\x04",
 		(char*)"x????xxxxx",
 		MemProc::ScanType::READ,
 		1,
 		(&TF2::dwLocalPlayer)
+	},
+	MemProc::Signature {
+		(unsigned char*)"\xA1\x00\x00\x00\x00\xA8\x01\x75\x51\x83\xC8\x01",
+		(char*)"x????xxxxxxx",
+		MemProc::ScanType::READ,
+		1,
+		(&TF2::dwEntityList)
+	},
+	MemProc::Signature {
+		(unsigned char*)"\x68\x00\x00\x00\x00\x8B\x40\x28\xFF\xD0\xA1",
+		(char*)"x????xxxxxx",
+		MemProc::ScanType::READ,
+		1,
+		(&TF2::dwButtonBase)
+	}
+};
+std::vector<MemProc::Signature> TF2::engineSigs = {
+	MemProc::Signature {
+		(unsigned char*)"\x83\x3D\x00\x00\x00\x00\x00\x0F\x9D\xC0\xC3",
+		(char*)"xx?????xxxx",
+		MemProc::ScanType::READ,
+		2,
+		(&TF2::dwIsInGame)
+	},
+	MemProc::Signature {
+		(unsigned char*)"\xD9\x1D\x00\x00\x00\x00\xD9\x46\x04",
+		(char*)"xx????xxx",
+		MemProc::ScanType::READ,
+		2,
+		(&TF2::dwViewAngles)
 	}
 };
 
@@ -129,13 +160,24 @@ void TF2::Initialize() {
 
 	unsigned long clientSz;
 	unsigned long clientBase = proc.getModule(clientDllName, &clientSz);
+	unsigned long engineSz;
+	unsigned long engineBase = proc.getModule(engineDllName, &engineSz);
 
-	for (unsigned int i = 0; i < signatures.size(); i++) {
+	for (unsigned int i = 0; i < clientSigs.size(); i++) {
 
-		MemProc::Signature& s = signatures[i];
+		MemProc::Signature& s = clientSigs[i];
 		(*s.resultPtr) = proc.FindAddress(clientBase, clientSz, s.sig, s.mask, s.type, s.offset);
 
 	}
+	for (unsigned int i = 0; i < engineSigs.size(); i++) {
+
+		MemProc::Signature& s = engineSigs[i];
+		(*s.resultPtr) = proc.FindAddress(engineBase, engineSz, s.sig, s.mask, s.type, s.offset);
+
+	}
+
+	TF2::dwEntityList += 0x18;
+	TF2::dwAttack = TF2::dwButtonBase + 0x2C;
 
 	proc.detach();
 

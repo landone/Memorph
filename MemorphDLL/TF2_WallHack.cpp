@@ -9,6 +9,8 @@
 
 void TF2_WallHack::OnStart() {
 
+	TF2::Initialize();
+
 	MemProc proc;
 
 	unsigned long clientSz = 0;
@@ -18,9 +20,6 @@ void TF2_WallHack::OnStart() {
 	entList = clientBase + TF2::dwEntityList;
 	localPlayerPtr = (unsigned long*)(clientBase + TF2::dwLocalPlayer);
 	viewMatrixPtr = (float*)(engineBase + TF2::dwViewMatrix);
-
-	TF2::Initialize();
-	printf("Local Player:  0x%X\n", TF2::dwLocalPlayer);
 
 	proc.detach();
 
@@ -98,8 +97,6 @@ void TF2_WallHack::drawBones(unsigned long ent, const glm::mat4& viewMat) {
 
 void TF2_WallHack::OnThink() {
 
-	return;
-
 	targets.clear();
 
 	if ((*localPlayerPtr) == NULL) {
@@ -117,13 +114,11 @@ void TF2_WallHack::OnThink() {
 
 	}
 
-	system("cls");
-	std::cout << "Class: " << TF2::ClassToString(*myClass) << std::endl;
-
-	if ((*myClass) == TF2::Class_Spy) {
+	/*if ((*myClass) == TF2::Class_Spy) {
 
 		int& activeWep = *((int*)((*localPlayerPtr) + TF2::m_hActiveWeapon));
 		int& meleeWep = *((int*)((*localPlayerPtr) + TF2::m_hMyWeapons + TF2::handleSize));
+		
 		if (activeWep == meleeWep && activeWep != NULL) {
 
 			unsigned long& wepBase = *((unsigned long*)(entList + (activeWep & 0xFFF) * TF2::entityRefSize));
@@ -140,9 +135,7 @@ void TF2_WallHack::OnThink() {
 
 		}
 
-	}
-
-	return;
+	}*/
 
 	float closestDist = INFINITY;
 	closestTarget = NULL;
@@ -183,8 +176,6 @@ void TF2_WallHack::OnThink() {
 }
 
 void TF2_WallHack::OnDraw() {
-
-	return;
 
 	if (!inGame || !(*localPlayerPtr)) {
 		return;

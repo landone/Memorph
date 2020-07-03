@@ -7,7 +7,8 @@
 class TF2 {
 public:
 
-	static std::vector<MemProc::Signature> signatures;
+	static std::vector<MemProc::Signature> clientSigs;
+	static std::vector<MemProc::Signature> engineSigs;
 	static void Initialize();
 
 	enum Class {
@@ -57,6 +58,7 @@ public:
 
 	static unsigned long dwEntityList;
 	static unsigned long dwLocalPlayer;
+	static unsigned long dwButtonBase;
 	static unsigned long dwAttack;
 	static unsigned long dwIsInGame;
 	static unsigned long dwViewAngles;
