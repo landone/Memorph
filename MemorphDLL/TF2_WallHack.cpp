@@ -38,6 +38,10 @@ void TF2_WallHack::aimAtHead(unsigned long target) {
 	}
 
 	unsigned long boneMat = *((unsigned long*)(target + TF2::dwBoneMatrix));
+	if (boneMat == NULL) {
+		return;
+	}
+
 	int targClass = *((int*)(target + TF2::m_iClass));
 	if (targClass == TF2::Class_Spy) {
 		/* Aim at disguise head */
@@ -71,6 +75,10 @@ glm::vec3 TF2_WallHack::getBonePos(unsigned long boneMat, int bone) {
 void TF2_WallHack::drawBones(unsigned long ent, const glm::mat4& viewMat) {
 
 	unsigned long boneMat = *((unsigned long*)(ent + TF2::dwBoneMatrix));
+	if (boneMat == NULL) {
+		return;
+	}
+
 	int entClass = *((int*)(ent + TF2::m_iClass));
 	if (entClass == TF2::Class_Spy) {
 		/* Draw bones for disguise instead */
@@ -141,29 +149,6 @@ void TF2_WallHack::OnThink() {
 
 	}
 
-	/*if ((*myClass) == TF2::Class_Spy) {
-
-		int& activeWep = *((int*)((*localPlayerPtr) + TF2::m_hActiveWeapon));
-		int& meleeWep = *((int*)((*localPlayerPtr) + TF2::m_hMyWeapons + TF2::handleSize));
-		
-		if (activeWep == meleeWep && activeWep != NULL) {
-
-			unsigned long& wepBase = *((unsigned long*)(entList + (activeWep & 0xFFF) * TF2::entityRefSize));
-			if (wepBase != NULL) {
-				bool& ready = *((bool*)(wepBase + TF2::m_bReadyToBackstab));
-				if (ready) {
-
-					int& attack = *((int*)(clientBase + TF2::dwAttack));
-					attack = 5;
-					attacked = true;
-
-				}
-			}
-
-		}
-
-	}*/
-
 	float closestDist = INFINITY;
 	closestTarget = NULL;
 	for (int i = 1; i <= TF2::MAX_PLAYERS; i++) {
@@ -203,10 +188,13 @@ void TF2_WallHack::OnThink() {
 	if (GetAsyncKeyState(VK_MBUTTON) & 0x8000) {
 		/* On middle mouse button press */
 		if (!middleMouse) {
-			aimAtHead(closestTarget);
-			int& attack = *((int*)(clientBase + TF2::dwAttack));
-			attack = 5;
-			attacked = true;
+			if (headTrack != closestTarget) {
+				aimAtHead(closestTarget);
+				headTrack = closestTarget;
+			}
+			else {
+				headTrack = NULL;
+			}
 		}
 		middleMouse = true;
 
@@ -230,13 +218,36 @@ void TF2_WallHack::OnDraw() {
 		if (targ == NULL) {
 			continue;
 		}
+
+		unsigned long boneMat = *((unsigned long*)(targ + TF2::dwBoneMatrix));
+		if (!boneMat) {
+			continue;
+		}
+
+		int targClass = *((int*)(targ + TF2::m_iClass));
+		glm::vec3 targHead = getBonePos(boneMat, TF2::BoneOrder[targClass][1]);
+		if (targHead == headList[targets[i]]) {
+			/* Probably a bugged/stationary skeleton */
+			continue;
+		}
+		else {
+			headList[targets[i]] = targHead;
+		}
+
 		if (targ == closestTarget) {
 			drawBones(closestTarget, viewMat);
+			if (headTrack == closestTarget) {
+				aimAtHead(headTrack);
+			}
+			else {
+				headTrack = NULL;
+			}
 		}
 		else {
 
 			float health = *((int*)(targ + TF2::m_iHealth)) / (float)(*((int*)(targ + TF2::m_iMaxHealth)));
 			glm::vec4 color = glm::vec4(255 * (1 - health), 255 * (health), 0, 255);
+
 			float* targOrig = ((float*)(targ + TF2::m_vecOrigin));
 
 			glm::vec2 targPos;
@@ -251,12 +262,6 @@ void TF2_WallHack::OnDraw() {
 
 		}
 
-	}
-
-	if (attacked) {
-		int& attack = *((int*)(clientBase + TF2::dwAttack));
-		attack = 4;
-		attacked = false;
 	}
 
 }
