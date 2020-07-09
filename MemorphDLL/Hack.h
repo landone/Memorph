@@ -7,5 +7,6 @@ public:
 	virtual void OnEnd() {};
 	virtual void OnThink() {};
 	virtual void OnDraw() {};
+	virtual void OnKey(unsigned char keyCode, bool pressed) {}
 
 };

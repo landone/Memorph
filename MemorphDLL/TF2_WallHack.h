@@ -14,6 +14,7 @@ public:
 	void OnEnd() override;
 	void OnThink() override;
 	void OnDraw() override;
+	void OnKey(unsigned char, bool) override;
 
 private:
 
@@ -37,5 +38,6 @@ private:
 	int* myTeam;
 	int* myClass;
 	unsigned long closestTarget = NULL;
+	bool middleMousePressed = false;
 
 };

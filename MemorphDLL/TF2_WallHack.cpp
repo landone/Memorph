@@ -4,12 +4,15 @@
 #include <iostream>
 
 #include "DX.h"
+#include "Memorph.h"
 #include "MemProc.h"
 #include "TF2.h"
 
 void TF2_WallHack::OnStart() {
 
 	TF2::Initialize();
+	Memorph::addMenuText("MOUSE3 - Lock on target head");
+	Memorph::addButton(VK_MBUTTON);
 
 	MemProc proc;
 
@@ -28,6 +31,18 @@ void TF2_WallHack::OnStart() {
 void TF2_WallHack::OnEnd() {
 
 	
+
+}
+
+void TF2_WallHack::OnKey(unsigned char key, bool pressed) {
+
+	if (!inGame || !pressed) {
+		return;
+	}
+
+	if (key == VK_MBUTTON) {
+		middleMousePressed = true;
+	}
 
 }
 
@@ -184,23 +199,16 @@ void TF2_WallHack::OnThink() {
 
 	}
 
-	static bool middleMouse = false;
-	if (GetAsyncKeyState(VK_MBUTTON) & 0x8000) {
-		/* On middle mouse button press */
-		if (!middleMouse) {
-			if (headTrack != closestTarget) {
-				aimAtHead(closestTarget);
-				headTrack = closestTarget;
-			}
-			else {
-				headTrack = NULL;
-			}
+	/* Necessary to avoid asynchronous trouble */
+	if (middleMousePressed) {
+		middleMousePressed = false;
+		if (headTrack != closestTarget) {
+			aimAtHead(closestTarget);
+			headTrack = closestTarget;
 		}
-		middleMouse = true;
-
-	}
-	else {
-		middleMouse = false;
+		else {
+			headTrack = NULL;
+		}
 	}
 
 }

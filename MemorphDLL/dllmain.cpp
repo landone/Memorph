@@ -1,67 +1,21 @@
-#include <vector>
+#include <Windows.h>
 #include <iostream>
 
-#include "Hack.h"
-#include "TF2.h"
+#include "Memorph.h"
 #include "TF2_WallHack.h"
 #include "CSGO_WallHack.h"
-#include "DX.h"
-
-TF2_WallHack hack;
-//CSGO_WallHack hack;
-std::vector<Hack*> hacks = {
-	&hack
-};
-
-void hkEndScene() {
-
-	for (int i = 0; i < hacks.size(); i++) {
-		hacks[i]->OnDraw();
-	}
-
-	static int thinkCounter = 0;
-	static const int thinkLimit = 5;
-	thinkCounter++;
-	if (thinkCounter == thinkLimit) {
-
-		thinkCounter = 0;
-		for (int i = 0; i < hacks.size(); i++) {
-			hacks[i]->OnThink();
-		}
-
-	}
-
-}
 
 DWORD WINAPI HackThread(HMODULE hModule) {
 
 	AllocConsole();
 	FILE* f;
 	freopen_s(&f, "CONOUT$", "w", stdout);
-	std::cout << "Memorph: Successfully injected" << std::endl;
+	std::cout << "Successfully injected" << std::endl;
 
-	for (int i = 0; i < hacks.size(); i++) {
-		hacks[i]->OnStart();
-	}
-
-	DX::HookEndScene(hkEndScene);
-
-	while (true) {
-
-		if (GetAsyncKeyState(VK_END) & 1) {
-			std::cout << "END pressed\n";
-			break;
-		}
-
-		Sleep(12);
-
-	}
-
-	DX::UnhookEndScene();
-
-	for (int i = 0; i < hacks.size(); i++) {
-		hacks[i]->OnEnd();
-	}
+	TF2_WallHack hack;
+	Memorph::addHack(hack);
+	Memorph::run();
+	Memorph::stop();
 
 	if (f != 0) {
 		fclose(f);
