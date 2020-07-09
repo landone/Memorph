@@ -2,44 +2,59 @@
 
 #include <string>
 #include <vector>
+#include <glm/vec3.hpp>
 
 #include "MemProc.h"
 
 class TF2 {
 public:
 
-	static std::vector<MemProc::Signature> clientSigs;
-	static std::vector<MemProc::Signature> engineSigs;
 	static void Initialize();
 
-	enum Class {
-		Class_None = 0,
-		Class_Scout,
-		Class_Sniper,
-		Class_Soldier,
-		Class_DemoMan,
-		Class_Medic,
-		Class_Heavy,
-		Class_Pyro,
-		Class_Spy,
-		Class_Engineer,
+	enum class BoneVector {
+		Type1 = 0,
+		Type2,
+		Type3,
+		Position
 	};
 
-	enum Team {
-		Team_None = 0,
-		Team_Spectate,
-		Team_RED,
-		Team_BLU
+	enum class Class {
+		None = 0,
+		Scout,
+		Sniper,
+		Soldier,
+		DemoMan,
+		Medic,
+		Heavy,
+		Pyro,
+		Spy,
+		Engineer,
 	};
 
-	enum GameStatus {
-		GameStatus_None = 0,
-		GameStatus_Connecting,
-		GameStatus_InGame
+	enum class Team {
+		None = 0,
+		Spectate,
+		RED,
+		BLU
 	};
 
-	static std::string ClassToString(int);
-	static std::string TeamToString(int);
+	enum class GameStatus {
+		None = 0,
+		Connecting,
+		InGame
+	};
+
+	static std::string ClassToString(TF2::Class);
+	static std::string TeamToString(TF2::Team);
+
+	static glm::vec3 getBoneVector(unsigned long boneMat, int bone, TF2::BoneVector);
+	static bool aimAtHead(unsigned long target);
+	static bool aimAt(glm::vec3 pos);
+	/* Returns address of bonematrix 4*4 */
+	static unsigned long getBoneMatrix(unsigned long target);
+	static TF2::Class getClass(unsigned long target);
+	static TF2::Team getTeam(unsigned long target);
+	static glm::vec3 getPosition(unsigned long target);
 	
 	static const unsigned long handleSize = 0x4;
 	static const unsigned long entityRefSize = 0x10;
@@ -47,6 +62,9 @@ public:
 	static const std::string processName;
 	static const std::string clientDllName;
 	static const std::string engineDllName;
+
+	static std::vector<MemProc::Signature> clientSigs;
+	static std::vector<MemProc::Signature> engineSigs;
 
 	static const int BoneOrder[10][17];
 	static const int BoneOrderSize = 17;
@@ -63,6 +81,14 @@ public:
 	static unsigned long dwAttack;
 	static unsigned long dwIsInGame;
 	static unsigned long dwViewAngles;
+
+	static unsigned long clientBase;
+	static unsigned long clientSz;
+	static unsigned long engineBase;
+	static unsigned long engineSz;
+	static unsigned long entityList;
+	static unsigned long* localPlayerPtr;
+	static float* viewMatrixPtr;
 
 	static const unsigned long dwViewMatrix = 0x59EB80;
 	static const unsigned long dwBoneMatrix = 0x5B0;

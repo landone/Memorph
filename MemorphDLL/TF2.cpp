@@ -11,6 +11,14 @@ unsigned long TF2::dwAttack = NULL;
 unsigned long TF2::dwIsInGame = NULL;
 unsigned long TF2::dwViewAngles = NULL;
 
+unsigned long TF2::clientBase = NULL;
+unsigned long TF2::clientSz = NULL;
+unsigned long TF2::engineBase = NULL;
+unsigned long TF2::engineSz = NULL;
+unsigned long TF2::entityList = NULL;
+unsigned long* TF2::localPlayerPtr = nullptr;
+float* TF2::viewMatrixPtr = nullptr;
+
 std::vector<MemProc::Signature> TF2::clientSigs = {
 	MemProc::Signature {
 		(unsigned char*)"\xA1\x00\x00\x00\x00\x33\xC9\x83\xC4\x04",
@@ -156,12 +164,18 @@ static std::string TeamNames[] = {
 
 void TF2::Initialize() {
 
+	static bool initialized = false;
+	if (initialized) {
+		return;
+	}
+	else {
+		initialized = true;
+	}
+
 	MemProc proc;
 
-	unsigned long clientSz;
-	unsigned long clientBase = proc.getModule(clientDllName, &clientSz);
-	unsigned long engineSz;
-	unsigned long engineBase = proc.getModule(engineDllName, &engineSz);
+	TF2::clientBase = proc.getModule(clientDllName, &clientSz);
+	TF2::engineBase = proc.getModule(engineDllName, &engineSz);
 
 	for (unsigned int i = 0; i < clientSigs.size(); i++) {
 
@@ -179,13 +193,126 @@ void TF2::Initialize() {
 	TF2::dwEntityList += 0x18;
 	TF2::dwAttack = TF2::dwButtonBase + 0x2C;
 
+	TF2::entityList = clientBase + TF2::dwEntityList;
+	TF2::localPlayerPtr = (unsigned long*)(clientBase + TF2::dwLocalPlayer);
+	TF2::viewMatrixPtr = (float*)(engineBase + TF2::dwViewMatrix);
+
 	proc.detach();
 
 }
 
-std::string TF2::ClassToString(int type) {
+glm::vec3 TF2::getBoneVector(unsigned long boneMat, int bone, TF2::BoneVector type) {
 
-	if (type < 0 || type > Class_Engineer) {
+	/* Bone data is stored in a 4x4 float matrix where each column represents a vector */
+
+	static int rowOffset = sizeof(float) * 4;
+	static int boneSize = sizeof(float) * 12;
+
+	if (boneMat == NULL) {
+		return glm::vec3(0,0,0);
+	}
+
+	int columnOffset = (int)type * sizeof(float);
+	glm::vec3 output;
+	output.x = *(float*)(boneMat + boneSize * bone + columnOffset);
+	output.y = *(float*)(boneMat + boneSize * bone + columnOffset + rowOffset);
+	output.z = *(float*)(boneMat + boneSize * bone + columnOffset + 2 * rowOffset);
+	return output;
+
+}
+
+bool TF2::aimAtHead(unsigned long target) {
+
+	if ((*localPlayerPtr) == NULL) {
+		return false;
+	}
+
+	unsigned long boneMat = TF2::getBoneMatrix(target);
+	if (boneMat == NULL) {
+		return false;
+	}
+
+	TF2::Class targClass = TF2::getClass(target);
+	if (targClass == TF2::Class::Spy) {
+		/* Aim at disguise head */
+		TF2::Class disguise = *((TF2::Class*)(target + TF2::m_nDisguiseClass));
+		if (disguise != TF2::Class::None) {
+			targClass = disguise;
+		}
+	}
+
+	glm::vec3 headPos = getBoneVector(boneMat, TF2::BoneOrder[(int)targClass][1], TF2::BoneVector::Position);
+
+	return aimAt(headPos);
+
+}
+
+bool TF2::aimAt(glm::vec3 targPos) {
+
+	if ((*localPlayerPtr) == NULL) {
+		return false;
+	}
+
+	float* myViewOffs = (float*)((*localPlayerPtr) + TF2::m_vecViewOffset);
+	glm::vec3 myPos = getPosition(*localPlayerPtr);
+	glm::vec3 myHead = glm::vec3(myPos[0] + myViewOffs[0], myPos[1] + myViewOffs[1], myPos[2] + myViewOffs[2]);
+	float* viewAng = (float*)(engineBase + TF2::dwViewAngles);
+
+	float flatDist = sqrtf(powf(targPos[0] - myHead[0], 2) + powf(targPos[1] - myHead[1], 2));
+	static float RAD_TO_DEG = 180.0f / 3.14159f;
+	viewAng[0] = -atan2f(targPos[2] - myHead[2], flatDist) * RAD_TO_DEG;
+	viewAng[1] = atan2f(targPos[1] - myHead[1], targPos[0] - myHead[0]) * RAD_TO_DEG;
+
+	return true;
+
+}
+
+TF2::Class TF2::getClass(unsigned long target) {
+
+	if (target == NULL) {
+		return Class::None;
+	}
+
+	return (TF2::Class)(*((int*)(target + TF2::m_iClass)));
+
+}
+
+TF2::Team TF2::getTeam(unsigned long target) {
+
+	if (target == NULL) {
+		return Team::None;
+	}
+
+	return (TF2::Team)(*((TF2::Team*)(target + TF2::m_iTeam)));
+
+}
+
+unsigned long TF2::getBoneMatrix(unsigned long target) {
+
+	if (target == NULL) {
+		return NULL;
+	}
+
+	return *((unsigned long*)(target + TF2::dwBoneMatrix));
+
+}
+
+glm::vec3 TF2::getPosition(unsigned long target) {
+
+	if (target == NULL) {
+		return glm::vec3(0, 0, 0);
+	}
+
+	float* origin = (float*)(target + TF2::m_vecOrigin);
+	return glm::vec3(origin[0], origin[1], origin[2]);
+
+}
+
+std::string TF2::ClassToString(TF2::Class mClass) {
+
+	int type = (int)mClass;
+
+	if (type < 0 || type > (int)TF2::Class::Engineer) {
 		type = 0;
 	}
 
@@ -193,9 +320,11 @@ std::string TF2::ClassToString(int type) {
 
 }
 
-std::string TF2::TeamToString(int type) {
+std::string TF2::TeamToString(TF2::Team team) {
 
-	if (type < 0 || type > Team_BLU) {
+	int type = (int)team;
+
+	if (type < 0 || type > (int)TF2::Team::BLU) {
 		type = 0;
 	}
 
