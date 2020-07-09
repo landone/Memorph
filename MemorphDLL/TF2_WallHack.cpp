@@ -9,7 +9,7 @@
 void TF2_WallHack::OnStart() {
 
 	TF2::Initialize();
-	Memorph::addMenuText("MOUSE3 - Lock on target head");
+	Memorph::addMenuText("MOUSE3 - Shoot at closest enemy head");
 	Memorph::addButton(VK_MBUTTON);
 
 }
@@ -136,16 +136,13 @@ void TF2_WallHack::OnThink() {
 	}
 
 	/* Necessary to avoid asynchronous trouble */
-	if (middleMousePressed) {
-		middleMousePressed = false;
-		if (headTrack != closestTarget) {
-			TF2::aimAtHead(closestTarget);
-			headTrack = closestTarget;
-		}
-		else {
-			headTrack = NULL;
-		}
+	if (middleMousePressed && closestTarget) {
+		TF2::aimAtHead(closestTarget);
+		int& attackValue = *(int*)(TF2::clientBase + TF2::dwAttack);
+		attackValue = 5;
+		attackFrames = 5;
 	}
+	middleMousePressed = false;
 
 }
 
@@ -153,6 +150,14 @@ void TF2_WallHack::OnDraw() {
 
 	if (!(*TF2::localPlayerPtr)) {
 		return;
+	}
+
+	if (attackFrames > 0) {
+		attackFrames--;
+		if (attackFrames == 0) {
+			int& attackValue = *(int*)(TF2::clientBase + TF2::dwAttack);
+			attackValue = 4;
+		}
 	}
 
 	memcpy(&viewMat[0][0], TF2::viewMatrixPtr, sizeof(float) * 16);
@@ -180,12 +185,6 @@ void TF2_WallHack::OnDraw() {
 
 		if (targ == closestTarget) {
 			drawBones(closestTarget, viewMat);
-			if (headTrack == closestTarget) {
-				TF2::aimAtHead(headTrack);
-			}
-			else {
-				headTrack = NULL;
-			}
 		}
 		else {
 

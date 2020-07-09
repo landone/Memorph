@@ -18,7 +18,8 @@ private:
 
 	void drawBones(unsigned long ent, const glm::mat4& viewMat);
 
-	unsigned long headTrack = NULL;
+	/* Amount of frames to wait before resetting attack values */
+	int attackFrames = 0;
 
 	std::vector<unsigned long> targets;
 	glm::vec3 headList[65];

@@ -4,10 +4,11 @@
 bool Memorph::running = false;
 std::vector<Hack*> Memorph::hacks;
 
-std::vector<std::string> Memorph::menuText = {
-	"MEMORPH",
-	"HOME - Toggle Menu",
-	"END - Exit Hack"
+std::vector<Memorph::MenuMessage> Memorph::menuText = {
+	Memorph::MenuMessage{"MEMORPH", {255, 0, 0}},
+	Memorph::MenuMessage{"=======", {255, 0, 0}},
+	Memorph::MenuMessage{"HOME - Toggle Menu", {255, 255, 255}},
+	Memorph::MenuMessage{"END - Exit Hack", {255, 255, 255}}
 };
 bool Memorph::showMenu = true;
 unsigned int Memorph::longestMenuText = 0;
@@ -24,9 +25,11 @@ std::vector<Memorph::Button> Memorph::buttons = {
 	}
 };
 
-void Memorph::addMenuText(std::string line) {
+void Memorph::addMenuText(std::string line, glm::vec3 color) {
 
-	menuText.push_back(line);
+	MenuMessage msg = { line, {(int)color.r, (int)color.g, (int)color.b} };
+
+	menuText.push_back(msg);
 	if (longestMenuText < line.length()) {
 		longestMenuText = line.length();
 	}
@@ -58,7 +61,8 @@ void Memorph::hookEndScene() {
 	if (showMenu) {
 		DX::DrawFillRect(glm::vec2(0, 0), glm::vec2(longestMenuText * 7, menuText.size() * 16), glm::vec4(10, 10, 10, 255));
 		for (unsigned int i = 0; i < menuText.size(); i++) {
-			DX::WriteText(glm::vec2(0, i * 16), menuText[i], glm::vec4(255, 0, 0, 255));
+			int* color = menuText[i].color;
+			DX::WriteText(glm::vec2(0, i * 16), menuText[i].msg, glm::vec4(color[0], color[1], color[2], 255));
 		}
 	}
 
@@ -92,8 +96,8 @@ bool Memorph::run() {
 	running = true;
 
 	for (unsigned int i = 0; i < menuText.size(); i++) {
-		if (menuText[i].length() > longestMenuText) {
-			longestMenuText = menuText[i].length();
+		if (menuText[i].msg.length() > longestMenuText) {
+			longestMenuText = menuText[i].msg.length();
 		}
 	}
 
