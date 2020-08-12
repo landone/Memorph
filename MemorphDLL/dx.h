@@ -8,13 +8,19 @@
 class DX {
 public:
 
+	struct Font {
+		ID3DXFont* data;
+		int height;
+	};
+
 	static bool HookEndScene(void (*callback)());
 	static void UnhookEndScene();
 
 	static bool WorldToScreen(const glm::vec3& pos, const glm::mat4& matrix, glm::vec2& output);
 	static void DrawFillRect(glm::vec2 pos, glm::vec2 dim, glm::vec4 color);
 	static void DrawLine(glm::vec2 pos, glm::vec2 pos2, int width, glm::vec4 color);
-	static void WriteText(glm::vec2 pos, std::string text, glm::vec4 color);
+	static void WriteText(glm::vec2 pos, std::string text, glm::vec4 color, Font font = { nullptr, 0 });
+	static Font MakeFont(int height, std::string name = "Arial", bool bold = false, bool italic = false);
 
 	static glm::vec2 GetWindowDim() { return glm::vec2(windowDim[0], windowDim[1]); }
 
@@ -28,8 +34,7 @@ private:
 	static HWND GetProcessWindow();
 
 	static HWND window;
-	static ID3DXFont* font;
-	static float fontHeight;
+	static Font font;
 	/* Window dimensions */
 	static int windowDim[2];
 	static LPDIRECT3DDEVICE9 pDevice;

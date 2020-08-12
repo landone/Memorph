@@ -221,6 +221,12 @@ glm::vec3 TF2::getBoneVector(unsigned long boneMat, int bone, TF2::BoneVector ty
 
 }
 
+unsigned long TF2::getLocalPlayer() {
+
+	return (*localPlayerPtr);
+
+}
+
 bool TF2::aimAtHead(unsigned long target) {
 
 	if ((*localPlayerPtr) == NULL) {

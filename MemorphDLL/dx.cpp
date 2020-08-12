@@ -2,6 +2,7 @@
 #include <Windows.h>
 #include <d3d9.h>
 #include <d3dx9.h>
+#include <codecvt>
 
 #pragma comment(lib, "d3d9.lib")
 #pragma comment(lib, "d3dx9.lib")
@@ -10,8 +11,7 @@
 #include "Hook.h"
 
 HWND DX::window;
-ID3DXFont* DX::font = nullptr;
-float DX::fontHeight = 16.0f;
+DX::Font DX::font = { nullptr, 16 };
 int DX::windowDim[2];
 LPDIRECT3DDEVICE9 DX::pDevice;
 void* DX::d3d9Device[119];
@@ -40,15 +40,31 @@ void DX::DrawLine(glm::vec2 pos, glm::vec2 pos2, int width, glm::vec4 color) {
 
 }
 
-void DX::WriteText(glm::vec2 pos, std::string text, glm::vec4 color) {
+DX::Font DX::MakeFont(int height, std::string name, bool bold, bool italic) {
 
-	if (font == nullptr) {
-		D3DXCreateFont(DX::pDevice, fontHeight, 0, FW_NORMAL, 1, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, ANTIALIASED_QUALITY,
-			DEFAULT_PITCH | FF_DONTCARE, L"Arial", &font);
+	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+	std::wstring str = converter.from_bytes(name);
+
+	Font result = { nullptr, height };
+	D3DXCreateFont(DX::pDevice, height, 0, (bold ? FW_BOLD : FW_NORMAL), 1, italic, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS,
+		ANTIALIASED_QUALITY, DEFAULT_PITCH | FF_DONTCARE, str.c_str(), &result.data);
+
+	return result;
+
+}
+
+void DX::WriteText(glm::vec2 pos, std::string text, glm::vec4 color, Font customFont) {
+
+	if (!font.data) {
+		font = MakeFont(font.height);
 	}
 
-	RECT rect = { pos.x, pos.y, pos.x + fontHeight * text.size(), pos.y + fontHeight };
-	font->DrawTextA(NULL, text.c_str(), -1, &rect, DT_LEFT, D3DCOLOR_RGBA((int)color.r, (int)color.g, (int)color.b, (int)color.a));
+	if (!customFont.data) {
+		customFont = font;
+	}
+
+	RECT rect = { pos.x, pos.y, pos.x + customFont.height * text.size(), pos.y + customFont.height };
+	((ID3DXFont*)customFont.data)->DrawTextA(NULL, text.c_str(), -1, &rect, DT_LEFT, D3DCOLOR_RGBA((int)color.r, (int)color.g, (int)color.b, (int)color.a));
 
 }
 

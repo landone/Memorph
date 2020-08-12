@@ -3,7 +3,7 @@
 
 #include "Memorph.h"
 #include "TF2_WallHack.h"
-#include "CSGO_WallHack.h"
+#include "TF2_SpyAlert.h"
 
 DWORD WINAPI HackThread(HMODULE hModule) {
 
@@ -12,8 +12,10 @@ DWORD WINAPI HackThread(HMODULE hModule) {
 	freopen_s(&f, "CONOUT$", "w", stdout);
 	std::cout << "Successfully injected" << std::endl;
 
-	TF2_WallHack hack;
-	Memorph::addHack(hack);
+	TF2_WallHack walls;
+	TF2_SpyAlert spies;
+	Memorph::addHack(walls);
+	Memorph::addHack(spies);
 	Memorph::run();
 	Memorph::stop();
 

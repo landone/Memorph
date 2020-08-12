@@ -115,6 +115,21 @@ void TF2_WallHack::OnThink() {
 			TF2::Team team = TF2::getTeam(entAdr);
 			if ((team == TF2::Team::RED || team == TF2::Team::BLU) && team != myTeam) {
 
+				unsigned long boneMat = TF2::getBoneMatrix(entAdr);
+				if (boneMat == NULL) {
+					continue;
+				}
+
+				TF2::Class targClass = TF2::getClass(entAdr);
+				glm::vec3 targHead = TF2::getBoneVector(boneMat, TF2::BoneOrder[(int)targClass][1], TF2::BoneVector::Position);
+				if (targHead == headList[i]) {
+					/* Probably a bugged/stationary skeleton */
+					continue;
+				}
+				else {
+					headList[i] = targHead;
+				}
+
 				targets.push_back(i);
 
 				glm::vec3 entOrig = TF2::getPosition(entAdr);
@@ -166,21 +181,6 @@ void TF2_WallHack::OnDraw() {
 		unsigned long targ = *((unsigned long*)(TF2::entityList + targets[i] * TF2::entityRefSize));
 		if (targ == NULL) {
 			continue;
-		}
-
-		unsigned long boneMat = TF2::getBoneMatrix(targ);
-		if (boneMat == NULL) {
-			continue;
-		}
-
-		TF2::Class targClass = *((TF2::Class*)(targ + TF2::m_iClass));
-		glm::vec3 targHead = TF2::getBoneVector(boneMat, TF2::BoneOrder[(int)targClass][1], TF2::BoneVector::Position);
-		if (targHead == headList[targets[i]]) {
-			/* Probably a bugged/stationary skeleton */
-			continue;
-		}
-		else {
-			headList[targets[i]] = targHead;
 		}
 
 		if (targ == closestTarget) {

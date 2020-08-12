@@ -55,6 +55,7 @@ public:
 	static TF2::Class getClass(unsigned long target);
 	static TF2::Team getTeam(unsigned long target);
 	static glm::vec3 getPosition(unsigned long target);
+	static unsigned long getLocalPlayer();
 	
 	static const unsigned long handleSize = 0x4;
 	static const unsigned long entityRefSize = 0x10;
