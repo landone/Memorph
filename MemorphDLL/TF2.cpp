@@ -19,6 +19,8 @@ unsigned long TF2::entityList = NULL;
 unsigned long* TF2::localPlayerPtr = nullptr;
 float* TF2::viewMatrixPtr = nullptr;
 
+const float TF2::ROCKET_SPEED = 1100.0f;
+
 std::vector<MemProc::Signature> TF2::clientSigs = {
 	MemProc::Signature {
 		(unsigned char*)"\xA1\x00\x00\x00\x00\x33\xC9\x83\xC4\x04",
@@ -259,9 +261,7 @@ bool TF2::aimAt(glm::vec3 targPos) {
 		return false;
 	}
 
-	float* myViewOffs = (float*)((*localPlayerPtr) + TF2::m_vecViewOffset);
-	glm::vec3 myPos = getPosition(*localPlayerPtr);
-	glm::vec3 myHead = glm::vec3(myPos[0] + myViewOffs[0], myPos[1] + myViewOffs[1], myPos[2] + myViewOffs[2]);
+	glm::vec3 myHead = TF2::getEyePosition();
 	float* viewAng = (float*)(engineBase + TF2::dwViewAngles);
 
 	float flatDist = sqrtf(powf(targPos[0] - myHead[0], 2) + powf(targPos[1] - myHead[1], 2));
@@ -311,6 +311,28 @@ glm::vec3 TF2::getPosition(unsigned long target) {
 
 	float* origin = (float*)(target + TF2::m_vecOrigin);
 	return glm::vec3(origin[0], origin[1], origin[2]);
+
+}
+
+glm::vec3 TF2::getEyePosition() {
+
+	if ((*localPlayerPtr) == NULL) {
+		return glm::vec3();
+	}
+
+	float* myViewOffs = (float*)((*localPlayerPtr) + TF2::m_vecViewOffset);
+	return getPosition(*localPlayerPtr) + glm::vec3(myViewOffs[0], myViewOffs[1], myViewOffs[2]);
+
+}
+
+glm::vec3 TF2::getVelocity(unsigned long target) {
+
+	if (target == NULL) {
+		return glm::vec3(0, 0, 0);
+	}
+
+	float* vel = (float*)(target + TF2::m_vecVelocity);
+	return glm::vec3(vel[0], vel[1], vel[2]);
 
 }
 

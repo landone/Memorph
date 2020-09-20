@@ -55,11 +55,14 @@ public:
 	static TF2::Class getClass(unsigned long target);
 	static TF2::Team getTeam(unsigned long target);
 	static glm::vec3 getPosition(unsigned long target);
+	static glm::vec3 getEyePosition();
+	static glm::vec3 getVelocity(unsigned long target);
 	static unsigned long getLocalPlayer();
 	
 	static const unsigned long handleSize = 0x4;
 	static const unsigned long entityRefSize = 0x10;
 	static const unsigned long MAX_PLAYERS = 64;
+	static const float ROCKET_SPEED;
 	static const std::string processName;
 	static const std::string clientDllName;
 	static const std::string engineDllName;
@@ -98,6 +101,7 @@ public:
 	static const unsigned long m_iClass = 0x154C;
 	static const unsigned long m_iTeam = 0xB0;
 	static const unsigned long m_vecOrigin = 0x364;
+	static const unsigned long m_vecVelocity = 0x120;
 	static const unsigned long m_vecViewOffset = 0xFC;
 	static const unsigned long m_bDucked = 0xE60;
 	static const unsigned long m_bJumping = 0x1A1C;

@@ -98,14 +98,14 @@ void TF2_WallHack::OnThink() {
 		return;
 	}
 
-
+	unsigned long localPlayer = TF2::getLocalPlayer();
 	float closestDist = INFINITY;
 	closestTarget = NULL;
-	TF2::Team myTeam = TF2::getTeam(*TF2::localPlayerPtr);
+	TF2::Team myTeam = TF2::getTeam(localPlayer);
 	for (int i = 1; i <= TF2::MAX_PLAYERS; i++) {
 
 		unsigned long& entAdr = *((unsigned long*)(TF2::entityList + i * TF2::entityRefSize));
-		if (entAdr != NULL && entAdr != (*TF2::localPlayerPtr)) {
+		if (entAdr != NULL && entAdr != localPlayer) {
 
 			int& observerMode = *((int*)(entAdr + TF2::m_iObserverMode));
 			if (observerMode != 0) {
@@ -152,10 +152,55 @@ void TF2_WallHack::OnThink() {
 
 	/* Necessary to avoid asynchronous trouble */
 	if (middleMousePressed && closestTarget) {
-		TF2::aimAtHead(closestTarget);
+
 		int& attackValue = *(int*)(TF2::clientBase + TF2::dwAttack);
 		attackValue = 5;
 		attackFrames = 5;
+		//Attempt to direct hit rocket
+		if (TF2::getClass(localPlayer) == TF2::Class::Soldier) {
+
+			unsigned long wep[2];
+			wep[0] = *((unsigned long*)(localPlayer + TF2::m_hActiveWeapon));
+			wep[1] = *((unsigned long*)(localPlayer + TF2::m_hMyWeapons));
+
+			//If primary weapon active (rocket launcher)
+			if (wep[0] == wep[1]) {
+
+				glm::vec3 vel = TF2::getVelocity(closestTarget);
+				float speed = TF2::ROCKET_SPEED;
+				glm::vec3 plpos = TF2::getPosition(closestTarget);
+				glm::vec3 eyepos = TF2::getEyePosition();
+
+				/* Quadratic formula time */
+				float a = glm::dot(vel, vel) - speed * speed;
+				//Unsolvable if 2a == 0
+				if (2 * a != 0.0f) {
+
+					float b = 2.0f * (glm::dot(vel, plpos) - glm::dot(vel, eyepos));
+					float c = glm::dot(plpos, plpos) + glm::dot(eyepos, eyepos) - 2 * (glm::dot(eyepos, plpos));
+					float sqrtTerm = sqrtf(b * b - 4.0f * a * c);
+
+					float t = -1;
+					if ((t = (-b + sqrtTerm) / (2.0f * a)) < 0.0f) {
+						t = (-b - sqrtTerm) / (2.0f * a);
+					}
+
+					//Can not go back in time
+					if (t > 0.0f) {
+
+						//Aim at intercept position
+						TF2::aimAt(plpos + vel * t);
+
+					}
+						
+				}
+
+			}
+		}
+		else {
+			TF2::aimAtHead(closestTarget);
+		}
+
 	}
 	middleMousePressed = false;
 

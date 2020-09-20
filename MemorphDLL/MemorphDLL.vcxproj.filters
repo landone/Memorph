@@ -38,6 +38,9 @@
     <ClCompile Include="Memorph.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="TF2_SpyAlert.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CSGO.h">
@@ -65,6 +68,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Memorph.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TF2_SpyAlert.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
