@@ -58,6 +58,7 @@ public:
 	static glm::vec3 getEyePosition();
 	static glm::vec3 getVelocity(unsigned long target);
 	static unsigned long getLocalPlayer();
+	static void updateGlowEffect(unsigned long target, bool set);
 	
 	static const unsigned long handleSize = 0x4;
 	static const unsigned long entityRefSize = 0x10;
@@ -85,6 +86,7 @@ public:
 	static unsigned long dwAttack;
 	static unsigned long dwIsInGame;
 	static unsigned long dwViewAngles;
+	static unsigned long dwGlowObjectManager;
 
 	static unsigned long clientBase;
 	static unsigned long clientSz;
@@ -120,5 +122,6 @@ public:
 	static const unsigned long m_angRotation = 0x370;
 	static const unsigned long m_angEyeAngles = 0x1C70;
 	static const unsigned long m_iObserverMode = 0x109C;
+	static const unsigned long m_bGlowEnabled = 0xDBD;
 
 };

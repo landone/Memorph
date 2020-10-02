@@ -150,6 +150,20 @@ void TF2_WallHack::OnThink() {
 
 	}
 
+	/*static unsigned lastWep = 0;
+	unsigned long activeWep = *((unsigned long*)(localPlayer + TF2::m_hActiveWeapon));
+	if (activeWep != lastWep) {
+
+		lastWep = activeWep;
+		system("cls");
+		printf("Active Weapon: %d\n", activeWep);
+		printf("Weapon Base: %d\n", activeWep & 0xFFF);
+		printf("Clip1: %d\n", *(int*)(TF2::entityList + (activeWep & 0xFFF) * TF2::entityRefSize + 0xAA8));
+		printf("Clip2: %d\n", *(int*)(TF2::entityList + (activeWep & 0xFFF) * TF2::entityRefSize + 0xAAC));
+		TF2::updateGlowEffect(localPlayer, true);
+
+	}*/
+
 	/* Necessary to avoid asynchronous trouble */
 	if (middleMousePressed && closestTarget) {
 

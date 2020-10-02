@@ -10,6 +10,7 @@ unsigned long TF2::dwButtonBase = NULL;
 unsigned long TF2::dwAttack = NULL;
 unsigned long TF2::dwIsInGame = NULL;
 unsigned long TF2::dwViewAngles = NULL;
+unsigned long TF2::dwGlowObjectManager = NULL;
 
 unsigned long TF2::clientBase = NULL;
 unsigned long TF2::clientSz = NULL;
@@ -42,6 +43,13 @@ std::vector<MemProc::Signature> TF2::clientSigs = {
 		MemProc::ScanType::READ,
 		1,
 		(&TF2::dwButtonBase)
+	},
+	MemProc::Signature {
+		(unsigned char*)"\xB9\x00\x00\x00\x00\xE8\x00\x00\x00\x00\xB0\x01\x5D",
+		(char*)"x????x????xxx",
+		MemProc::ScanType::READ,
+		1,
+		(&TF2::dwGlowObjectManager)
 	}
 };
 std::vector<MemProc::Signature> TF2::engineSigs = {
@@ -226,6 +234,13 @@ glm::vec3 TF2::getBoneVector(unsigned long boneMat, int bone, TF2::BoneVector ty
 unsigned long TF2::getLocalPlayer() {
 
 	return (*localPlayerPtr);
+
+}
+
+void TF2::updateGlowEffect(unsigned long target, bool set) {
+
+	*(bool*)(target + TF2::m_bGlowEnabled) = set;
+	((void(*)(unsigned long))(*(unsigned long**)(target))[0x35C / 4])(target);
 
 }
 
