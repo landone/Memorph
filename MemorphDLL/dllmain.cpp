@@ -4,6 +4,7 @@
 #include "Memorph.h"
 #include "TF2_WallHack.h"
 #include "TF2_SpyAlert.h"
+#include "TF2_Camera.h"
 
 DWORD WINAPI HackThread(HMODULE hModule) {
 
@@ -13,9 +14,11 @@ DWORD WINAPI HackThread(HMODULE hModule) {
 	std::cout << "Successfully injected" << std::endl;
 
 	TF2_WallHack walls;
-	TF2_SpyAlert spies;
+	//TF2_SpyAlert spies;
+	//TF2_Camera camera;
 	Memorph::addHack(walls);
-	Memorph::addHack(spies);
+	//Memorph::addHack(spies);
+	//Memorph::addHack(camera);
 	Memorph::run();
 	Memorph::stop();
 

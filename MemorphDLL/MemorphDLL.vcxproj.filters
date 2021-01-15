@@ -41,6 +41,9 @@
     <ClCompile Include="TF2_SpyAlert.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="TF2_Camera.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CSGO.h">
@@ -71,6 +74,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="TF2_SpyAlert.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TF2_Camera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

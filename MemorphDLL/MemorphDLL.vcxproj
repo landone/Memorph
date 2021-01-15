@@ -150,6 +150,7 @@
     <ClCompile Include="Memorph.cpp" />
     <ClCompile Include="MemProc.cpp" />
     <ClCompile Include="TF2.cpp" />
+    <ClCompile Include="TF2_Camera.cpp" />
     <ClCompile Include="TF2_SpyAlert.cpp" />
     <ClCompile Include="TF2_WallHack.cpp" />
   </ItemGroup>
@@ -163,6 +164,7 @@
     <ClInclude Include="MemProc.h" />
     <ClInclude Include="TF2.h" />
     <ClInclude Include="TF2_SpyAlert.h" />
+    <ClInclude Include="TF2_Camera.h" />
     <ClInclude Include="TF2_WallHack.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
